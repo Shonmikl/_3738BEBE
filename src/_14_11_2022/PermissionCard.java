@@ -8,7 +8,7 @@ public class PermissionCard {
     }
 
     void permit(Employee employee) {
-        if(employee.getBusinessPosition()==BusinessPosition.EMPLOYEE) {
+        if (employee.getBusinessPosition() == BusinessPosition.EMPLOYEE) {
             System.out.println("Не пускать в столовую");
         }
     }
@@ -16,6 +16,5 @@ public class PermissionCard {
     public static void main(String[] args) {
         PermissionCard kc
                 = new PermissionCard(new Employee("Konstantin", BusinessPosition.EMPLOYEE));
-
     }
 }
