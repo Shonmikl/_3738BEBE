@@ -8,10 +8,10 @@
 ***************JCF. Java Collections Framework************************
 Working with Arrays in Java. Binary search. Sort.
 Data structures definition. Interfaces. Data structure 'List'. ArraysList implementation, beginning.
-Iterator and Iterable. Foreach syntax.
-Lists implementations. LinkedList.
+**Iterator and Iterable. Foreach syntax.
+**Lists implementations. LinkedList.
 Java Set implementation. HashSet. Exercises.
-Comparing objects in Java. Comparator, Comparable. Method sort.
+!!!!!Comparing objects in Java. Comparator, Comparable. Method sort.
 Data structures 'Queue', 'Stack'. Custom ArrayDeque implementation.
 Data structure 'Map'. Object.hashCode, HashMap implementation.
 Trees, Binary Trees, Tree Map.

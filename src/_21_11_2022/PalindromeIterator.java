@@ -7,7 +7,5 @@ public class PalindromeIterator {
     public static void main(String[] args) {
         String s = "word";
         List<Character> list = new LinkedList<>();
-
-
     }
 }
