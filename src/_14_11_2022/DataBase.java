@@ -9,6 +9,7 @@ public class DataBase {
     List<Employee> employeeList = new LinkedList<>();
     Map<BusinessPosition, List<Employee>> map = new HashMap<>();
 
+
     public void addEmp(Employee employee) {
         employeeList.add(employee);
     }

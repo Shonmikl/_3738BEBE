@@ -18,6 +18,7 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -28,6 +29,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
