@@ -3,7 +3,6 @@ package _23_11_2022;
 import _23_11_2022.employee.Employee;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,7 +10,7 @@ public class Test2 {
     public static void main(String[] args) {
         List<Employee> employeeList = new ArrayList<>();
         Employee em1
-                = new Employee(12, "Konstantin", "JAVA DEV", 600);
+                = new Employee(12, "Konstantin", "JAVA DEV", 550);
         Employee em2
                 = new Employee(21, "Oxana", "JAVA DEV", 1500);
         Employee em3
@@ -27,7 +26,7 @@ public class Test2 {
         employeeList.add(em4);
 
         System.out.println(employeeList);
-        Collections.sort(employeeList);
+        Collections.sort(employeeList, new SalaryComparator());
         System.out.println("************************************************");
         System.out.println(employeeList);
     }

@@ -1,17 +1,19 @@
 package _23_11_2022.employee;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.ToString;
 
 import java.util.Objects;
 
 @AllArgsConstructor
 @ToString
+@Getter
 public class Employee implements Comparable<Employee> {
     int id;
     String name;
     String position;
-    double salaryEuro;
+    int salaryEuro;
 
     @Override
     public boolean equals(Object o) {
