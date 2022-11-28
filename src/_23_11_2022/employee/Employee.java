@@ -45,6 +45,7 @@ public class Employee implements Comparable<Employee> {
 
     @Override
     public int compareTo(Employee anotherEmp) {
+        //o1.compareTo(o2)
         int res = this.name.compareTo(anotherEmp.name);
         if (res == 0) {
             res = this.position.compareTo(anotherEmp.position);
