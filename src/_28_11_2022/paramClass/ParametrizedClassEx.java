@@ -1,12 +1,14 @@
 package _28_11_2022.paramClass;
 
 import java.lang.constant.Constable;
+import java.util.ArrayList;
 
 public class ParametrizedClassEx {
     public static void main(String[] args) {
         //Info<String> info = new Info<>("Hi");
 //        System.out.println(info);
 //        String s = info.getValue();
+
 
         Info<? extends Number> info1 = new Info<>(11);
         System.out.println(info1);
