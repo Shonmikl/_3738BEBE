@@ -14,6 +14,5 @@ public class SbEx {
         builder.trimToSize();
 
         StringBuffer stringBuffer = new StringBuffer("StringBuffer");
-
     }
 }

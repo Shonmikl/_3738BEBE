@@ -31,8 +31,8 @@ General and repetition
 
 *********************************Test, Summarizing***************************
 Regular expressions. Basics. Regular Expressions, Java RegExp
-Class String and its methods. Immutable. StringBuilder, StringBuffer, performance test.
-++Generics,
+++Class String and its methods. Immutable. StringBuilder, StringBuffer
+++Generics
 Object.equals
 Exceptions.
 
