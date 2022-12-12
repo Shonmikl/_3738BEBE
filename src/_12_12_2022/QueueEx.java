@@ -1,10 +1,12 @@
 package _12_12_2022;
 
+import java.util.ArrayDeque;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class QueueEx {
     public static void main(String[] args) {
+
         Queue<String> queue = new LinkedList<>();
         queue.add("Alexander");
         queue.add("Svitlana");
