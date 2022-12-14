@@ -14,7 +14,7 @@ Working with Arrays in Java. Binary search. Sort.
 ++Comparing objects in Java. Comparator, Comparable. Method sort.
 ++Data structures 'Queue', 'Stack'. Custom ArrayDeque implementation.
 Data structure 'Map'. Object.hashCode, HashMap implementation.
-Trees, Binary Trees, Tree Map.
+++Trees, Binary Trees, Tree Map.
 Graphs. Practice.
 
 *********************Lambdas & Stream API************************************
