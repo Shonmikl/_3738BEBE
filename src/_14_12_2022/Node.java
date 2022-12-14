@@ -33,10 +33,10 @@ public class Node {
     }
 
     private static Node getMin(Node node) {
-        if(!isNodeExist(node)) {
+        if (!isNodeExist(node)) {
             return null;
         }
-        if((!isNodeExist(node.left))) {
+        if ((!isNodeExist(node.left))) {
             return node;
         }
         return getMin(node.left);
@@ -48,7 +48,7 @@ public class Node {
     }
 
     private static void inOrderTraversal(Node node) {
-        if(!isNodeExist(node)) {
+        if (!isNodeExist(node)) {
             return;
         }
         inOrderTraversal(node.left);
@@ -66,13 +66,41 @@ public class Node {
 
     }
 
-    //todo class
+    //todo
     private static void moveNode(Node toNode, Node fromNode) {
 
     }
 
-    //todo class
+    //todo
     private static int getChildrenCount(Node node) {
         return 0;
+    }
+
+    //todo
+    private static Node getChildOrNull(Node node) {
+        return null;
+    }
+
+    private static void removeNodeWithOneOrZeroChild(Node nodeToDelete) {
+        Node childOrNull = getChildOrNull(nodeToDelete);
+        moveNode(nodeToDelete, childOrNull);
+    }
+
+    //todo
+    private static boolean remove(Node root, int value) {
+        return false;
+    }
+
+    public static void main(String[] args) {
+        Integer[] digit = {9, 2, 5, 13, 6, 10, 14, 7, 33, 44, 3};
+        Node node = new Node();
+        createNode(node, 9);
+        for (int i = 1; i < digit.length; i++) {
+            insert(node, digit[i]);
+        }
+        inOrderTraversal(node);
+        remove(node, 10);
+        System.out.println();
+        inOrderTraversal(node);
     }
 }
