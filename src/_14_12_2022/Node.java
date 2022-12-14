@@ -47,6 +47,7 @@ public class Node {
         return null;
     }
 
+    //симметричный обход
     private static void inOrderTraversal(Node node) {
         if (!isNodeExist(node)) {
             return;
@@ -57,27 +58,31 @@ public class Node {
     }
 
     //todo
+    //обратный обход
     private static void postOrderTraversal(Node node) {
-
+        //вот тут написать метод
     }
 
     //todo
+    //прямой обход
     private static void directOrderTraversal(Node node) {
-
+        //вот тут написать метод
     }
 
     //todo
     private static void moveNode(Node toNode, Node fromNode) {
-
+        //вот тут написать метод
     }
 
     //todo
     private static int getChildrenCount(Node node) {
+        //вот тут написать метод
         return 0;
     }
 
     //todo
     private static Node getChildOrNull(Node node) {
+        //вот тут написать метод
         return null;
     }
 
