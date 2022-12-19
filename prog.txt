@@ -6,16 +6,16 @@
 ++Understanding reference type. Reference Data Types in Java
 
 ***************JCF. Java Collections Framework************************
-Working with Arrays in Java. Binary search. Sort.
+++Working with Arrays in Java. Binary search. Sort.
 ++Data structures definition. Interfaces. Data structure 'List'. ArraysList implementation, beginning.
 ++Iterator and Iterable. Foreach syntax.
 ++Lists implementations. LinkedList.
 ++Java Set implementation. HashSet. Exercises.
 ++Comparing objects in Java. Comparator, Comparable. Method sort.
 ++Data structures 'Queue', 'Stack'. Custom ArrayDeque implementation.
-Data structure 'Map'. Object.hashCode, HashMap implementation.
+++Data structure 'Map'. Object.hashCode, HashMap implementation.
 ++Trees, Binary Trees, Tree Map.
-Graphs. Practice.
+!!!!! Graphs. Practice.
 
 *********************Lambdas & Stream API************************************
 Lambdas, Functional Interfaces, Method references.
@@ -36,7 +36,7 @@ Regular expressions. Basics. Regular Expressions, Java RegExp
 Object.equals
 Exceptions.
 
-*************************Unit testing. JUnit.******************************
+Unit testing. JUnit.******************************
 LocalDate, LocalDateTime, ZonedDateTime, exercises.
 
 *************************Multithreading*************************************
