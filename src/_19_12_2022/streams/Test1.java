@@ -1,6 +1,7 @@
 package _19_12_2022.streams;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class Test1 {
     public static void main(String[] args) {
@@ -52,5 +53,9 @@ public class Test1 {
         long c = Arrays.stream(dis)
                 .count();
         System.out.println(c);
+
+//        List<Integer> list = List.of(1);
+//        list.set(0, 55);
+//        System.out.println(list);
     }
 }

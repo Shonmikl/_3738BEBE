@@ -17,18 +17,18 @@ public class St1 {
 
         Arrays.stream(arr)
                 .map(elem -> elem * 3)
-                .reduce((el1, el2) -> el1 + el2)
+                .reduce(Integer::sum)
                 .getAsInt();
 
         Arrays.stream(arr)
                 .map(elem -> elem * 3)
-                .forEach(el -> System.out.println(el));
+                .forEach(System.out::println);
 
 
         int w = Arrays.stream(arr)
                 .filter(el -> el % 2 == 0) //10 48 42 8
                 .map(el -> el * 10) // 100 480 420 80
-                .reduce((el1, el2) -> el1 + el2)//1080
+                .reduce(Integer::sum)//1080
                 .getAsInt();
         System.out.println(w);
 

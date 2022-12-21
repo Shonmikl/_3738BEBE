@@ -1,8 +1,11 @@
 package _19_12_2022.streams.students;
 
+import lombok.ToString;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@ToString
 public class Faculty {
     String name;
     List<Student> studentsOnFaculty;
