@@ -15,14 +15,15 @@
 ++Data structures 'Queue', 'Stack'. Custom ArrayDeque implementation.
 ++Data structure 'Map'. Object.hashCode, HashMap implementation.
 ++Trees, Binary Trees, Tree Map.
-!!!!! Graphs. Practice.
+++Graphs. Practice.
 
 *********************Lambdas & Stream API************************************
-Lambdas, Functional Interfaces, Method references.
-Existing Functional Interfaces in Java 8. Functions and Predicates.
-Stream API: Stream, primitive. Intermediate and Terminal operations.
-Java Streams: Flat map.
-Java Streams: Collectors and Custom Collectors.
+++Lambdas, Functional Interfaces,
+!!Method references.
+++Existing Functional Interfaces in Java 8. Functions and Predicates.
+++Stream API: Stream, primitive. Intermediate and Terminal operations.
+++Java Streams: Flat map.
+!!Java Streams: Collectors and Custom Collectors.
 Input and Output in Java.
 Introduction to Input and Output in Java
 Reading/Writing of bytes.

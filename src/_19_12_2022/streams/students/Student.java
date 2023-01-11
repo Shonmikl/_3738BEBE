@@ -10,10 +10,10 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class Student {
-    private String name = "456";
+    private String name;
 
     private char sex;
-    private int age = 4;
-    private int course;
+    private int age;
+    private Integer course;
     private double avgGrade;
 }

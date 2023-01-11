@@ -52,11 +52,44 @@ public class Test8 {
 //        }
 
         //partitioningBy
-        Map<Boolean, List<Student>> map = list.stream()
-          .collect(Collectors.partitioningBy(student -> student.getAvgGrade() > 8));
+//        Map<Boolean, List<Student>> map = list.stream()
+//          .collect(Collectors.partitioningBy(student -> student.getAvgGrade() > 8));
+//
+//        for (Map.Entry<Boolean, List<Student>> entry: map.entrySet()) {
+//            System.out.println(entry);
+//        }
 
-        for (Map.Entry<Boolean, List<Student>> entry: map.entrySet()) {
-            System.out.println(entry);
-        }
+        //findFirst()
+//        Student stud = list.stream()
+//                .filter(student -> student.getSex() == 'f')
+//                .sorted((s1, s2) -> s1.getAge() - s2.getAge())
+//                .findFirst()
+//                .get();
+//
+//        System.out.println(stud);
+
+        //min / max / average
+        Student min = list.stream().min((s1, s2) -> s1.getAge() - s2.getAge()).get();
+        Student max = list.stream().max((s1, s2) -> (int) (s1.getAvgGrade() - s2.getAvgGrade())).get();
+        double aver = list.stream()
+                .mapToDouble(el -> el.getAvgGrade())
+                .average()
+                .getAsDouble();
+
+        List<Double> courses =
+                list.stream()
+                        .mapToDouble(Student::getSex)
+                        .boxed()
+                        .toList();
+
+//        list.stream()
+//                .filter(el -> el.getAge() > 18)
+//                .limit(2)
+//                .forEach(System.out::println);
+
+        list.stream()
+                .filter(el -> el.getAge() > 18)
+                .skip(2)
+                .forEach(System.out::println);
     }
 }
