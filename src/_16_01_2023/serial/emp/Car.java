@@ -8,6 +8,6 @@ import java.io.Serializable;
 @ToString
 @AllArgsConstructor
 public class Car implements Serializable {
-    String model;
+    transient String model;
     String colour;
 }
