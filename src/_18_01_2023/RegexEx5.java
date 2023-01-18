@@ -6,10 +6,11 @@ import java.util.regex.Pattern;
 public class RegexEx5 {
 
     public static void main(String[] args) {
+        //1236 5478 9654 1258 12/54 655
         String card = "12365478965412581254655";
         Pattern pattern = Pattern.compile("");
         Matcher matcher = pattern.matcher(card);
-        String cardString = null;
-        System.out.println(cardString);
+        String cardString = matcher.replaceAll("");
+       // System.out.println(cardString);
     }
 }
