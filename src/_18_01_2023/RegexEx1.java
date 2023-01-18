@@ -14,7 +14,7 @@ public class RegexEx1 {
                 "- where he has moved Tesla's headquarters - " +
                 "but that was reje1cted@gmail.ru . 987654";
 
-        String v = "ABABBBDDBABABABBAsssbaABAB";
+        String v = "ABABBBDDBABABAB1BAsssbaABAB";
 
         //Pattern -> regex
         //Matcher -> String <-> Pattern
