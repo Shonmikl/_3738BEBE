@@ -24,14 +24,14 @@
 ++Stream API: Stream, primitive. Intermediate and Terminal operations.
 ++Java Streams: Flat map.
 !!Java Streams: Collectors and Custom Collectors.
-Input and Output in Java.
-Introduction to Input and Output in Java
-Reading/Writing of bytes.
-Reading/Writing of strings.
+++Input and Output in Java.
+++Introduction to Input and Output in Java
+++Reading/Writing of bytes.
+++Reading/Writing of strings.
 General and repetition
 
 *********************************Test, Summarizing***************************
-Regular expressions. Basics. Regular Expressions, Java RegExp
+++Regular expressions. Basics. Regular Expressions, Java RegExp
 ++Class String and its methods. Immutable. StringBuilder, StringBuffer
 ++Generics
 Object.equals
