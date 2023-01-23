@@ -19,7 +19,7 @@
 
 *********************Lambdas & Stream API************************************
 ++Lambdas, Functional Interfaces,
-!!Method references.
+++Method references.
 ++Existing Functional Interfaces in Java 8. Functions and Predicates.
 ++Stream API: Stream, primitive. Intermediate and Terminal operations.
 ++Java Streams: Flat map.
@@ -35,8 +35,8 @@ General and repetition
 ++Class String and its methods. Immutable. StringBuilder, StringBuffer
 ++Generics
 Object.equals
-Exceptions.
-Unit testing. JUnit
+++Exceptions.
+Unit testing. JUnit5
 LocalDate, LocalDateTime, ZonedDateTime, exercises.
 
 *************************Multithreading*************************************

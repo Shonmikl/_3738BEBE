@@ -27,8 +27,10 @@ public class FileInputStreamAndOutputStream {
 
             System.out.println("DONE!!!");
 
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("B");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("A");
         }
     }
 }

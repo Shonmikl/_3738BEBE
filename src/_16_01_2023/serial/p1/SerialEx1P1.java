@@ -19,7 +19,7 @@ public class SerialEx1P1 {
             outputStream.writeObject(employees);
             System.out.println("DONE!");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("!!!!");
         }
     }
 }
