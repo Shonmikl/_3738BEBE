@@ -15,7 +15,7 @@
 ++Data structures 'Queue', 'Stack'. Custom ArrayDeque implementation.
 ++Data structure 'Map'. Object.hashCode, HashMap implementation.
 ++Trees, Binary Trees, Tree Map.
-++Graphs. Practice.
+?????? -> Graphs. Practice.
 
 *********************Lambdas & Stream API************************************
 ++Lambdas, Functional Interfaces,
@@ -36,8 +36,7 @@ General and repetition
 ++Generics
 Object.equals
 Exceptions.
-
-Unit testing. JUnit.******************************
+Unit testing. JUnit
 LocalDate, LocalDateTime, ZonedDateTime, exercises.
 
 *************************Multithreading*************************************
