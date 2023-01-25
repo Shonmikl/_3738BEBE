@@ -36,7 +36,7 @@ General and repetition
 ++Generics
 Object.equals
 ++Exceptions.
-Unit testing. JUnit5
+++Unit testing. JUnit5
 LocalDate, LocalDateTime, ZonedDateTime, exercises.
 
 *************************Multithreading*************************************
