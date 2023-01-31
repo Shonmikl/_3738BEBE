@@ -14,7 +14,7 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 public class SpyWithSpyTest {
     @Spy
-    List<String> list = new ArrayList<>();
+    ArrayList<String> list = new ArrayList<>();
 
     @Test
     void testMockReturnZero() {

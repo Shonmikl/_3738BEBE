@@ -14,7 +14,7 @@ import java.util.List;
 public class SpyWithoutSpyTest {
 
     @Mock
-    List<String> list = new ArrayList<>();
+    List<String> list;
 
     @Test
     void testMockReturnZero() {
