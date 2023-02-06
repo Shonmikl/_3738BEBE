@@ -39,11 +39,11 @@ public class Call {
     }
 
     void zoomCall() throws InterruptedException {
-//        synchronized (LOCK) {
-        System.out.println("Zoom call starts" + " | " + Thread.currentThread().getName());
-        Thread.sleep(1500);
-        System.out.println("Zoom call finished" + " | " + Thread.currentThread().getName());
-        //       }
+        synchronized (LOCK) {
+            System.out.println("Zoom call starts" + " | " + Thread.currentThread().getName());
+            Thread.sleep(1500);
+            System.out.println("Zoom call finished" + " | " + Thread.currentThread().getName());
+        }
     }
 }
 
@@ -54,11 +54,11 @@ class DOTHIS implements Runnable {
     public void run() {
         try {
             //1 2 3
-            synchronized (this) {
-                call.mobileCall();
-                call.skypeCall();
-                call.zoomCall();
-            }
+//            synchronized (this) {
+            call.mobileCall();
+            call.skypeCall();
+            call.zoomCall();
+            // }
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
