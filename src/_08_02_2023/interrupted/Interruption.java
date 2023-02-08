@@ -29,7 +29,7 @@ class InterruptedThread extends Thread {
             }
             sqrtSum += Math.sqrt(i);
             try {
-                sleep(100);
+                sleep(500);
             } catch (InterruptedException e) {
                 System.out.println("Current thread T1 " +
                         "was interrupted while sleeping");
