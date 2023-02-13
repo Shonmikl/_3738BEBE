@@ -51,11 +51,12 @@ Threads Executors.
 Apache Maven, сборка проектов.
 Принципы программирования: DRY, YAGNI, KISS, SOLID.
 Reflections. Annotations..
+Java JDBC API, работа с базами данных + Hibernate
+
 Spring Framework: Introduction, Context and Beans
 Spring Framework: Beans configuration
 Spring Boot: Onion (Hexagonal) architecture
 Spring Boot: Implementing Rest Controllers
-Java JDBC API, работа с базами данных
 Spring Boot: JPA and databases
 Spring Boot: validation
 Spring Boot: logging and AOP basics
