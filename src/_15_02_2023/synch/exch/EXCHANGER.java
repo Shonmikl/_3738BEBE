@@ -8,6 +8,15 @@ public class EXCHANGER {
     public static void main(String[] args) {
         Exchanger<Action> exchanger = new Exchanger<>();
 
+        //написать метод, который будет генерить Action и
+        //передавать его в конструктор. Те
+        //каждый раз будут выигровать разные игроки
+
+        //Написать метод который принимает в качесвте
+        //значения кол-во игроков которые должны создаться
+        //и сыграть друг с другом на победу play(7)
+
+
         List<Action> myList = new LinkedList<>();
         myList.add(Action.SCISSORS);
         myList.add(Action.SCISSORS);
@@ -54,7 +63,7 @@ class Player extends Thread {
     public void run() {
         Action reply;
         for (Action action : actionList) {
-            try {//a1 a2
+            try {
                 reply = exchanger.exchange(action);
                 getWinner(action, reply);
                 Thread.sleep(2500);
