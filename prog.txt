@@ -46,6 +46,7 @@ Synchronization. Mutex, Monitor. Atomic types..
 Object.wait, Object.join. One-element blocking queue (Messenger).
 JavaUtilConcurrent. Concurrent Collections.
 Threads Executors.
+Callable
 
 **************************Spring & Spring Boot*********************************
 Apache Maven, сборка проектов.
@@ -61,3 +62,13 @@ Spring Boot: JPA and databases
 Spring Boot: validation
 Spring Boot: logging and AOP basics
 Spring Boot: scheduled jobs
+GIT
+MySql/Postgres/Oracle/H2
+Hibernate
+Swagger
+Docker
+Kubernetes
+Kafka/RabbitMQ
+Liquibase
+
+30-06-2023
