@@ -40,16 +40,16 @@ Object.equals
 LocalDate, LocalDateTime, ZonedDateTime, exercises.
 
 *************************Multithreading*************************************
-General introduction to Java multithreading, main problems.
-Thread, Runnable, Daemon threads, Interrupted Exception
-Synchronization. Mutex, Monitor. Atomic types..
-Object.wait, Object.join. One-element blocking queue (Messenger).
-JavaUtilConcurrent. Concurrent Collections.
-Threads Executors.
+++General introduction to Java multithreading, main problems.
+++Thread, Runnable, Daemon threads, Interrupted Exception
+++Synchronization. Mutex, Monitor. Atomic types..
+++Object.wait, Object.join. One-element blocking queue (Messenger).
+++JavaUtilConcurrent. Concurrent Collections.
+++Threads Executors.
 Callable
 
 **************************Spring & Spring Boot*********************************
-Apache Maven, сборка проектов.
+Apache Maven/Gradle, сборка проектов.
 Принципы программирования: DRY, YAGNI, KISS, SOLID.
 Reflections. Annotations..
 Java JDBC API, работа с базами данных + Hibernate
@@ -62,9 +62,10 @@ Spring Boot: JPA and databases
 Spring Boot: validation
 Spring Boot: logging and AOP basics
 Spring Boot: scheduled jobs
+
+Monolit vs MicroService
 GIT
 MySql/Postgres/Oracle/H2
-Hibernate
 Swagger
 Docker
 Kubernetes
