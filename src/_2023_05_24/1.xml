@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
+http://www.liquibase.org/xml/ns/dbchangelog">
+
+    <changeSet id="insert-managers-data" author="Alexey">
+        <insert tableName="manager">
+            <column name="id" valueComputed="UUID_TO_BIN('158bf4ff-1c1f-42e9-a1bf-3c47d0cdda91')"/>
+            <column name="first_name">Joerg</column>
+            <column name="last_name">Bluhm</column>
+            <column name="status" value="ACTIVE"/>
+            <column name="created_at">2023-03-13 10:00:00</column>
+            <column name="updated_at">2023-03-13 10:00:00</column>
+        </insert>
+        <insert tableName="manager">
+            <column name="id" valueComputed="UUID_TO_BIN('8ff23c99-2a9c-4c9c-8c29-ed191cd4e239')"/>
+            <column name="first_name">Frank</column>
+            <column name="last_name">Zehlius</column>
+            <column name="status" value="PENDING"/>
+            <column name="created_at">2023-03-13 11:00:00</column>
+            <column name="updated_at">2023-03-13 11:00:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-client-data" author="Alexey">
+        <insert tableName="client">
+            <column name="id" valueComputed="UUID_TO_BIN('572f52db-fed9-4145-9276-2d0e2acf84fc')"/>
+            <column name="manager_id" valueComputed="UUID_TO_BIN('158bf4ff-1c1f-42e9-a1bf-3c47d0cdda91')"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="tax_code">78145936</column>
+            <column name="first_name">Robert</column>
+            <column name="last_name">Schmidt</column>
+            <column name="email">robschmidt@gmail.com</column>
+            <column name="password">rS134598744</column>
+            <column name="address">Neustrasse 15, 33515 Neuss, Germany</column>
+            <column name="phone">01529298777</column>
+            <column name="created_at">2023-03-13 16:16:16</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-account-data" author="Alexey">
+        <insert tableName="account">
+            <column name="id" valueComputed="UUID_TO_BIN('6ebb1295-ca5d-4bd3-b3ff-66b28ca68021')"/>
+            <column name="client_id" valueComputed="UUID_TO_BIN('572f52db-fed9-4145-9276-2d0e2acf84fc')"/>
+            <column name="name">Checking Account</column>
+            <column name="type" value="CREDIT"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="balance">3000.00</column>
+            <column name="currency_code" value="EUR"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-product-data" author="Alexey">
+        <insert tableName="product">
+            <column name="id" valueComputed="UUID_TO_BIN('bf158f08-9e8d-40ad-a507-b653eb692052')"/>
+            <column name="manager_id" valueComputed="UUID_TO_BIN('158bf4ff-1c1f-42e9-a1bf-3c47d0cdda91')"/>
+            <column name="name">Credit</column>
+            <column name="status" value="ACTIVE"/>
+            <column name="currency_code" value="EUR"/>
+            <column name="interest_rate">0.750</column>
+            <column name="rest">10000</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-agreement-data" author="Alexey">
+        <insert tableName="agreement">
+            <column name="id" valueComputed="UUID_TO_BIN('cd65de81-28eb-41b6-8384-b2bf962a2126')"/>
+            <column name="account_id" valueComputed="UUID_TO_BIN('6ebb1295-ca5d-4bd3-b3ff-66b28ca68021')"/>
+            <column name="product_id" valueComputed="UUID_TO_BIN('bf158f08-9e8d-40ad-a507-b653eb692052')"/>
+            <column name="interest_rate">1.750</column>
+        </insert>
+    </changeSet>
+
+    <changeSet author="Alexey" id="insert-transaction-data">
+        <insert tableName="transaction">
+            <column name="id" valueComputed="UUID_TO_BIN('80e5616f-9d02-4693-b49a-69e2531bdbe9')"/>
+            <column name="debit_account_id" valueComputed="UUID_TO_BIN('6ebb1295-ca5d-4bd3-b3ff-66b28ca68021')"/>
+            <column name="credit_account_id" valueComputed="UUID_TO_BIN('6ebb1295-ca5d-4bd3-b3ff-66b28ca68021')"/>
+            <column name="type" value="NEW"/>
+            <column name="amount">295.0000</column>
+            <column name="description">Transaction for testing</column>
+            <column name="created_at">2022-01-01 12:00:00</column>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -1,4 +1,4 @@
-package _20_02_2023;
+package _20_02_2023.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 
 public class Reflex2 {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Class pClass = Class.forName("_20_02_2023.P");
+        Class pClass = Class.forName("_20_02_2023.reflection.P");
         Constructor<P> constructor = pClass.getConstructor();
         P obj = constructor.newInstance();
 

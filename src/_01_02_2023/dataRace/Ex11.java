@@ -1,5 +1,6 @@
 package _01_02_2023.dataRace;
 
+
 public class Ex11 {
     static int counter = 0;
 

@@ -49,10 +49,11 @@ LocalDate, LocalDateTime, ZonedDateTime, exercises.
 Callable
 
 **************************Spring & Spring Boot*********************************
-Apache Maven/Gradle, сборка проектов.
-Принципы программирования: DRY, YAGNI, KISS, SOLID.
-Reflections. Annotations..
-Java JDBC API, работа с базами данных + Hibernate
+++Apache Maven/Gradle, сборка проектов.
+++Принципы программирования: DRY, YAGNI, KISS, !!!SOLID!!!.
+++Reflections. Annotations..
+
+++Java JDBC API, работа с базами данных + Hibernate
 
 Spring Framework: Introduction, Context and Beans
 Spring Framework: Beans configuration
@@ -71,5 +72,6 @@ Docker
 Kubernetes
 Kafka/RabbitMQ
 Liquibase
+DAO/DTO
 
 30-06-2023

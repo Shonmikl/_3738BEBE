@@ -1,6 +1,11 @@
 package _05_12_2022;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+
 import java.util.*;
+
 
 public class Main {
     public static void main(String[] args) {

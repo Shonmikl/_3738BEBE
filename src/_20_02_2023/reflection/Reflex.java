@@ -1,4 +1,4 @@
-package _20_02_2023;
+package _20_02_2023.reflection;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class Reflex {
     public static void main(String[] args)
             throws ClassNotFoundException, NoSuchFieldException, NoSuchMethodException {
-        Class pClass = Class.forName("_20_02_2023.P");
+        Class pClass = Class.forName("_20_02_2023.reflection.P");
         //Class pClass2 = P.class;
         Field field = pClass.getField("id");
         System.out.println("Field type is: " + field.getType());
