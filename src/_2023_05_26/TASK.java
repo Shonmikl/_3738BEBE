@@ -13,8 +13,8 @@ public class TASK {
     }
 
     /**
-     * [ 1 2 3 4 5 5]
-     * out 5
+     * [5 4 9 2 9 0 1 1 0 4 5]
+     * out 2
      */
 
     private static int duplicated(int[] array) {
