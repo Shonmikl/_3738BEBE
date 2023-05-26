@@ -1,0 +1,60 @@
+server:
+  port: 8080
+  error:
+    path: /error
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  datasource:
+    url: jdbc:h2:mem:test
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      data-locations: classpath:db/data.sql
+      mode: always
+  thymeleaf:
+    suffix: .html
+  messages:
+    basename: i18n.messages
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 200MB
+      max-request-size: 215MB
+  mail:
+    host: "127.0.0.1"
+    port: 2525
+    username: "cs_admin@gmail.com"
+    password: ""
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      transport.protocol: smtp
+      ssl.trust: smtp.gmail.com
+      debug: true
+
+file:
+  upload-dir: "src/main/resources"
+
+variables:
+  projectPackageName: "com.testing.accreditation"
+  jwtSecret: "Trololo"
+  jwtExpirationMs: 864000000
+  jwtExpirationMsForTest: 864000000
+  applicationUrl: "http://localhost:8080/"
