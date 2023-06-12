@@ -3,7 +3,6 @@ package _30_01_2023.testClasses.dummyTest;
 import _30_01_2023.mockClasses.dummy.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
 
 //Dummy
