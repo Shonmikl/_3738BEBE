@@ -13,6 +13,6 @@ public class MyClass {
 
     logger.info("Это информационное сообщение YAML.");
     logger.warn("Это предупреждение YAML.");
-    logger.error("Это сообщение об ошибке  YAML.");
+    logger.error("Это сообщение об ошибке YAML.");
   }
 }
