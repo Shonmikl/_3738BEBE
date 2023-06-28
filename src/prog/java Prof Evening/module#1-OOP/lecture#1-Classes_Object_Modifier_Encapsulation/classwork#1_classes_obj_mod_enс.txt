@@ -1,0 +1,238 @@
+
+
+Пример создания класса в Java, приводится ниже:
+
+// Example1.java
+
+public class Dog{
+   String breed;
+   int age;
+   String color;
+
+   void barking(){
+   }
+   
+   void hungry(){
+   }
+   
+   void sleeping(){
+   }
+}
+
+
+
+Варианты, как создать объект в классе:
+
+Объявление: объявление переменной с именем переменной с типом объекта.
+Инстанцирование: используется «новое» ключевое слово.
+Инициализация: «новое» ключевое слово сопровождается вызовом конструктора. Этот вызов инициализирует новый объект.
+Пример приводится ниже:
+
+// Example2.java
+
+public class Puppy{
+
+   public Puppy(String name){
+      // Это конструктор и у него один параметр, name.
+      System.out.println("Передаваемое имя:" + name ); 
+   }
+   public static void main(String []args){
+      // Создание объекта myPuppy.
+      Puppy myPuppy = new Puppy( "Багет" );
+   }
+}
+
+Доступ к переменным экземпляра и методам
+
+Пример
+Этот пример объясняет, как получить доступ к переменные экземпляра и методам класса в Java:
+
+// Example3.java
+
+public class Puppy{
+   
+   int puppyAge;
+
+   public Puppy(String name){
+      // Это конструктор и у него один параметр, name.
+      System.out.println("Передаваемое имя:" + name ); 
+   }
+   public void setAge( int age ){
+       puppyAge = age;
+   }
+
+   public int getAge( ){
+       System.out.println("Возраст щенка:" + puppyAge ); 
+       return puppyAge;
+   }
+   public static void main(String []args){
+      /* Создание объекта. */
+      Puppy myPuppy = new Puppy( "Багет" );
+
+      /* Вызов метод класса, чтобы установить возраст щенка. */ 
+      myPuppy.setAge( 2 );
+
+      /* Вызов другого метода класса, чтобы получить возраст щенка. */
+      myPuppy.getAge( );
+
+      /* Получение переменной экземпляра класса. */
+      System.out.println("Значение переменной:" + myPuppy.puppyAge ); 
+   }
+}
+
+
+
+Для нашего обучения создадим два класса. Это будут классы Employee и EmployeeTest.
+
+// Example4.java
+
+Класс Employee имеет четыре переменных экземпляра name, age, designation и salary. Он имеет один явно определенный конструктор, который принимает параметр.
+
+import java.io.*;
+public class Employee{
+   String name;
+   int age;
+   String designation;
+   double salary;
+	
+   // Это конструктор класса Employee. 
+   public Employee(String name){
+      this.name = name;
+   }
+   // Присвоение возраста работника переменной age.
+   public void empAge(int empAge){
+      age =  empAge;
+   }
+   /* Присвоение переменной designation. */
+   public void empDesignation(String empDesig){
+      designation = empDesig;
+   }
+   /* Присвоение переменной salary. */
+   public void empSalary(double empSalary){
+      salary = empSalary;
+   }
+   /* Вывод подробной информации. */
+   public void printEmployee(){
+      System.out.println("Имя:"+ name );
+      System.out.println("Возраст:" + age );
+      System.out.println("Наименование:" + designation );
+      System.out.println("Заработная плата:" + salary);
+   }
+}
+
+
+Сохраните следующий код в файл «EmployeeTest.java»:
+
+import java.io.*;
+public class EmployeeTest{
+
+   public static void main(String args[]){
+      /* Создание двух объектов с помощью конструктора. */
+      Employee empOne = new Employee("Олег Олегов");
+      Employee empTwo = new Employee("Иван Иванов");
+
+      // Вызов метода для каждого созданного объекта.
+      empOne.empAge(26);
+      empOne.empDesignation("Старший инженер-программист");
+      empOne.empSalary(1000);
+      empOne.printEmployee();
+
+      empTwo.empAge(21);
+      empTwo.empDesignation("Инженер-программист");
+      empTwo.empSalary(500);
+      empTwo.printEmployee();
+   }
+}
+
+
+Модификаторы доступа
+
+
+Рассмотрим модификаторы доступа на примере следующей программы:
+
+//Example5.java
+
+public class Program{
+      
+    public static void main(String[] args) {
+             
+        Person kate = new Person("Kate", 32, "Baker Street", "+12334567");
+        kate.displayName();     // норм, метод public
+        kate.displayAge();      // норм, метод имеет модификатор по умолчанию
+        kate.displayPhone();    // норм, метод protected
+        //kate.displayAddress();  // ! Ошибка, метод private
+ 
+        System.out.println(kate.name);      // норм, модификатор по умолчанию
+        System.out.println(kate.address);   // норм, модификатор public
+        System.out.println(kate.age);       // норм, модификатор protected
+        //System.out.println(kate.phone);   // ! Ошибка, модификатор private
+    }
+}
+class Person{
+     
+    String name;
+    protected int age;
+    public String address;
+    private String phone;
+ 
+    public Person(String name, int age, String address, String phone){
+        this.name = name;
+        this.age = age;
+        this.address = address;
+        this.phone = phone;
+    }
+    public void displayName(){
+        System.out.printf("Name: %s \n", name);
+    }
+    void displayAge(){
+        System.out.printf("Age: %d \n", age);
+    }
+    private void displayAddress(){
+        System.out.printf("Address: %s \n", address);
+    }
+    protected void displayPhone(){
+        System.out.printf("Phone: %s \n", phone);
+    }}
+
+Инкапсуляция
+
+Пример инкапсуляции путем использования методов доступа. 
+
+// Example6.java
+
+public class Program{
+      
+    public static void main(String[] args) {
+             
+        Person kate = new Person("Kate", 30);
+        System.out.println(kate.getAge());      // 30
+        kate.setAge(33);    
+        System.out.println(kate.getAge());      // 33
+        kate.setAge(123450);    
+        System.out.println(kate.getAge());      // 33
+    }
+}
+class Person{
+     
+    private String name;
+    private int age = 1;
+ 
+    public Person(String name, int age){
+         
+        setName(name);
+        setAge(age);
+    }
+    public String getName(){
+        return this.name;
+    }
+    public void setName(String name){
+        this.name = name;
+    }
+    public int getAge(){
+        return this.age;
+    }
+    public void setAge(int age){
+        if(age > 0 && age < 110)
+            this.age = age;
+    }
+}

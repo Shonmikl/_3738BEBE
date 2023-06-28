@@ -1,0 +1,238 @@
+Показать работу Thread Executors можно на примере работы некоторой строительной компании, которая работает в разных городах
+
+Строительсто объекта по стадиями (stages) будет реализовано в классе:
+
+public class Building implements Runnable {
+    private String city;
+    private CountDownLatch latch;
+    private String[] stages;
+    private boolean printDateWithSeconds;
+
+    public Building(CountDownLatch latch, String city, String[] stages, boolean printDateWithSeconds) {
+        this.city = city;
+        this.latch = latch;
+        this.stages = stages;
+        this.printDateWithSeconds = printDateWithSeconds;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < stages.length; i++) {
+            if (printDateWithSeconds)
+                System.out.println(city + ": " + stages[i] + ", " + Thread.currentThread().getName() + " " + new Date());
+            else
+                System.out.println(city + ": " + stages[i] + ", " + Thread.currentThread().getName());
+            latch.countDown();
+
+            // можно показать без sleep, но лучше видно с этим параметром
+            try {
+                Thread.sleep((long)(Math.random()*1500));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+}
+
+---
+newSingleThreadExecutor()
+
+// Имитация работы строительной компании, у которой техники хватает только на 1 объект.
+// Строительная компания, у которой есть объекты для строительства в разных городах (4 штуки)
+// На каждый объект одни и те же стадии строительства.
+
+// Создаём пул с одним потоками исполнения через newSingleThreadExecutor,
+// через который работают 4 задачи
+// одна задача выполняется, остальные ожидают
+public class Example1 {
+    public static void main(String[] args) {
+
+        String[] stages = new String[]{
+                "1.Проектная деятельность", "2.Старт строительных работ",
+                "3.Финиш строительных работ", "4.Отделочные работы"
+        };
+
+        CountDownLatch cd1 = new CountDownLatch(stages.length);
+        CountDownLatch cd2 = new CountDownLatch(stages.length);
+        CountDownLatch cd3 = new CountDownLatch(stages.length);
+        CountDownLatch cd4 = new CountDownLatch(stages.length);
+
+        ExecutorService es = Executors.newSingleThreadExecutor();
+
+        System.out.println("Запуск потоков");
+
+        es.execute(new Building(cd1, "Dusseldorf", stages, false));
+        es.execute(new Building(cd2, "Cologne", stages, false));
+        es.execute(new Building(cd3, "Dortmund", stages, false));
+        es.execute(new Building(cd4, "Essen", stages, false));
+
+        try {
+            cd1.await();
+            cd2.await();
+            cd3.await();
+            cd4.await();
+        } catch (InterruptedException exc) {
+            System.out.println(exc);
+        }
+
+        es.shutdown();
+        System.out.println("Завершение потоков");
+
+    }
+}
+
+---
+newFixedThreadPool()
+
+
+// Строительная компания, у которой есть объекты для строительства в разных городах (4 штуки)
+// На каждый объект одни и те же стадии строительства.
+
+// Создаём фиксированный пул с двумя потоками исполнения через newFixedThreadPool, через который работают 4 задачи
+// (объекта строительства в разных городах), несмотря на то, что у нас всего 2 потока, т.е. 2 задачи могут быть
+// выполнены одновременно, а остальные задачи просто ждут когда в пуле освободится один из потоков
+public class Example2 {
+    public static void main(String[] args) {
+
+        String[] stages = new String[]{
+                "1.Проектная деятельность", "2.Старт строительных работ",
+                "3.Финиш строительных работ", "4.Отделочные работы"
+        };
+
+        CountDownLatch cd1 = new CountDownLatch(stages.length);
+        CountDownLatch cd2 = new CountDownLatch(stages.length);
+        CountDownLatch cd3 = new CountDownLatch(stages.length);
+        CountDownLatch cd4 = new CountDownLatch(stages.length);
+
+        ExecutorService es = Executors.newFixedThreadPool(2);
+
+        System.out.println("Запуск потоков");
+
+        es.execute(new Building(cd1, "Dusseldorf", stages, false));
+        es.execute(new Building(cd2, "Cologne", stages, false));
+        es.execute(new Building(cd3, "Dortmund", stages, false));
+        es.execute(new Building(cd4, "Essen", stages, false));
+
+        try {
+            cd1.await();
+            cd2.await();
+            cd3.await();
+            cd4.await();
+        } catch (InterruptedException exc) {
+            System.out.println(exc);
+        }
+
+        es.shutdown();
+        System.out.println("Завершение потоков");
+
+    }
+}
+
+
+---
+newCachedThreadPool()
+
+
+// Строительная компания, у которой есть объекты для строительства в разных городах (4 штуки)
+// На каждый объект одни и те же стадии строительства.
+
+// Создаём пул через newCachedThreadPool, через который работают 4 задачи
+
+// Когда мы создаем пул потоков с помощью этого метода, максимальный размер пула потоков устанавливается на
+// максимальное целочисленное значение в Java. Этот метод создает новые потоки по запросу и разрушает потоки,
+// которые простаивают больше минуты, если запрос отсутствует.
+
+// Никакой очереди ожидания здесь не будет. Если поток остается в бездействии более минуты,
+// метод устраняет его. Таким образом, этот метод — хороший выбор, если вам хочется добиться большей
+// производительности очереди, чем это возможно с методом newFixedThreadPool(). Но если вы хотите ограничить
+// количество параллельно выполняемых задач во имя управления ресурсами, лучше использовать newFixedThreadPool()
+public class Example3 {
+    public static void main(String[] args) {
+
+        String[] stages = new String[]{
+                "1.Проектная деятельность", "2.Старт строительных работ",
+                "3.Финиш строительных работ", "4.Отделочные работы"
+        };
+
+        CountDownLatch cd1 = new CountDownLatch(stages.length);
+        CountDownLatch cd2 = new CountDownLatch(stages.length);
+        CountDownLatch cd3 = new CountDownLatch(stages.length);
+        CountDownLatch cd4 = new CountDownLatch(stages.length);
+
+        ExecutorService es = Executors.newCachedThreadPool();
+
+        System.out.println("Запуск потоков");
+
+        es.execute(new Building(cd1, "Dusseldorf", stages, false));
+        es.execute(new Building(cd2, "Cologne", stages, false));
+        es.execute(new Building(cd3, "Dortmund", stages, false));
+        es.execute(new Building(cd4, "Essen", stages, false));
+
+        try {
+            cd1.await();
+            cd2.await();
+            cd3.await();
+            cd4.await();
+        } catch (InterruptedException exc) {
+            System.out.println(exc);
+        }
+
+        es.shutdown();
+        System.out.println("Завершение потоков");
+
+    }
+}
+
+---
+newScheduledThreadPool()
+
+// Строительная компания, у которой есть объекты для строительства в разных городах (4 штуки)
+// На каждый объект одни и те же стадии строительства.
+
+// Создаём пул исполнения через newScheduledThreadPool, который может планировать выполнение задач после заданной
+// задержки или через регулярные промежутки времени. Данный пример с использованием метода schedule(), но могут
+// быть другие варианты с использованием методов scheduleAtFixedRate() и scheduleWithFixedDelay()
+
+// здесь можно отследить по времени задержку запуска работы с тем или иным городом
+
+public class Example4 {
+    public static void main(String[] args) {
+
+        String[] stages = new String[]{
+                "1.Проектная деятельность", "2.Старт строительных работ",
+                "3.Финиш строительных работ", "4.Отделочные работы"
+        };
+
+        CountDownLatch cd1 = new CountDownLatch(stages.length);
+        CountDownLatch cd2 = new CountDownLatch(stages.length);
+        CountDownLatch cd3 = new CountDownLatch(stages.length);
+        CountDownLatch cd4 = new CountDownLatch(stages.length);
+
+        ScheduledExecutorService es = Executors.newScheduledThreadPool(3);
+
+        System.out.println("Запуск потоков " + new Date());
+
+        es.schedule(new Building(cd1, "Dusseldorf", stages, true), 3, TimeUnit.SECONDS);
+        es.schedule(new Building(cd2, "Cologne", stages, true), 4, TimeUnit.SECONDS);
+        es.schedule(new Building(cd3, "Dortmund", stages, true), 5, TimeUnit.SECONDS);
+        es.schedule(new Building(cd4, "Essen", stages, true), 6, TimeUnit.SECONDS);
+
+//        es.execute(new Building(cd1, "Dusseldorf", stages));
+//        es.execute(new Building(cd2, "Cologne", stages));
+//        es.execute(new Building(cd3, "Dortmund", stages));
+//        es.execute(new Building(cd4, "Essen", stages));
+
+        try {
+            cd1.await();
+            cd2.await();
+            cd3.await();
+            cd4.await();
+        } catch (InterruptedException exc) {
+            System.out.println(exc);
+        }
+
+        es.shutdown();
+        System.out.println("Завершение потоков");
+
+    }
+}

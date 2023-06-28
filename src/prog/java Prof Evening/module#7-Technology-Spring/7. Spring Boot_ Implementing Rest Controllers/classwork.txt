@@ -1,0 +1,98 @@
+Создаем проект и добавляем зависимости Spring Boot DevTools, Lombok и Spring Web.
+
+Разделим все классы на слои, создадим в папке com.example.telran четыре новые папки:
+
+model – для хранения POJO-классов;
+
+repository – в полноценных проектах используется для взаимодействия с БД, но т.к. у нас ее нет, то он будет содержать список пользователей;
+
+service – слой сервиса, прослойка между контролером и слоем ресурсов, используется для получения данных из ресурса, их проверки и преобразования (если это необходимо);
+
+controllers – будет содержать в себе классы контроллеры.
+
+В папке model создаем POJO класс User(объясняем аннотации @Data и @AllArgsConstructor).
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class User {
+    private String login;
+    private String password;
+    private String firstname;
+    private String lastname;
+    private Integer age;
+}
+
+В папке repository создаём класс UserRepository c двумя методами:
+
+getByLogin – который будет возвращать пользователя по логину;
+
+getAll – который будет возвращать список всех доступных пользователей. Чтобы Spring создал бин на основании этого класса, устанавливаем ему аннотацию @Repository.
+
+@Repository
+public class UserRepository {
+  
+    private List<User> users;
+
+    public UserRepository() {
+        this.users = List.of(
+                new User("anton", "1234", "Антон", "Иванов", 20),
+                new User("ivan", "12345", "Сергей", "Петров", 21));
+    }
+
+    public User getByLogin(String login) {
+        return this.users.stream()
+                .filter(user -> login.equals(user.getLogin()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<User> getAll() {
+        return this.users;
+    }
+
+В папке service создаем класс UserService. 
+Устанавливаем классу аннотацию @Service и добавляем инъекцию бина UserRepository. 
+В класс добавляем метод getAll, который будет возвращать всех пользователей и getByLogin для получения одного пользователя по логину.
+
+@Service
+public class UserService {
+
+    private UserRepository repository;
+
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<User> getAll() {
+        return this.repository.getAll();
+    }
+
+    public User getByLogin(String login) {
+        return this.repository.getByLogin(login);
+    }
+}
+
+Создаем контроллер UserController в папке rest, добавляем ему инъекцию UserService и создаем один метод getAll. С помощью аннотации @GetMapping указываем адрес контроллера, по которому он будет доступен клиенту и тип возвращаемых данных.
+
+@RestController
+public class UserController {
+
+    private UserService service;
+
+    public UserController(UserService service) {
+        this.service = service;
+    }
+
+    @GetMapping(path = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody List<User> getAll() {
+        return this.service.getAll();
+    }
+}
+
+Запускаем приложение и проверяем, что оно работает, для этого достаточно в браузере указать адрес http://localhost:8080/users
+
+Самостоятельная работа:
+Разработайте сервис, который возвращает список городов в виде данных JSON (по типу того, что было сделано на уроке).

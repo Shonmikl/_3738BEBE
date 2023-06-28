@@ -1,0 +1,261 @@
+---
+Повторим и вспомним
+--- 
+Object Class Methods
+
+note -> задать вопрос, помнят ли студенты методы из класса Object
+напомнить, что это важно знать!
+
+
+clone() - Создает и возвращает копию этого объекта.
+equals(Object obj) - Указывает, является ли какой-либо другой объект «равным» этому.
+finalize() - Вызывается сборщиком мусора для объекта при сборке мусора определяет, что больше нет ссылок на объект.
+getClass() - Возвращает класс среды выполнения этого параметра .Object
+hashCode() - Возвращает значение хэш-кода для объекта.
+notify() - Пробуждение одного потока, ожидающего этого объекта монитор.
+notifyAll() - Выводит из спящего режима все потоки, ожидающие на мониторе этого объекта
+toString() - Возвращает строковое представление объекта.
+wait() - Заставляет текущий поток ждать, пока другой поток не вызовет метод notify() или метод notifyAll() для этого объекта
+wait(long timeout) - Заставляет текущий поток ждать, пока другой поток не вызовет метод notify() или метод notifyAll() для этого объекта, 
+        или прошло указанное количество времени.
+wait(long timeout, int nanos) - Заставляет текущий поток ждать, пока другой поток не вызовет метод notify() 
+        или метод notifyAll() для этого объекта, или какой-то другой поток прерывает текущий поток, 
+        или определенный прошло много реального времени.
+
+
+---
+wait Methods
+Синхронизированные методы или блоки позволяют только одному потоку одновременно получать блокировку ресурса. 
+Когда метод wait() вызывается потоком, он отказывается от блокировки этого ресурса и переходит в спящий режим до тех пор, 
+пока какой-либо другой поток не войдет в тот же монитор и не вызовет метод notify() или notifyAll().
+
+Вызов notify() выводит из спящего сигнала только один поток, а вызов notifyAll() пробуждает все потоки на одном объекте. 
+
+Различие между методами sleep() и wait() заключается в том, что метод sleep() приводит поток в спящий режим 
+в течение определенного периода времени, в то время как wait() приводит поток в спящий режим до тех пор, 
+пока не будут вызваны notify() и notifyAll().
+
+---
+пример
+
+// Example1.java
+public class Crossbow {
+    private int arrows = 10;
+
+    // When the arrows end, the wait() method is called and releases.
+    synchronized public void fire() {
+        for (int idx = arrows; idx >= 0; idx--) {
+
+            if (idx != 0) {
+                System.out.println("The arrow is " + (arrows - idx + 1) + " right on the target!");
+            } else {
+                System.out.println("The arrows are over");
+                arrows = 0;
+                System.out.println("Count arrows " + arrows);
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Carry a new quiver with arrows!!");
+            }
+        }
+    }
+
+    // reload() brings new arrows, calls the notify() method, which awakens the thread
+    synchronized public void reload() {
+        System.out.println("New arrows on the way!");
+        arrows = 10;
+        System.out.println("Count arrows = " + arrows);
+        notify();
+    }
+}
+
+public class TestCrossbow extends Thread {
+    public static void main(String[] args) {
+
+        Crossbow crossbow = new Crossbow();
+
+        new Thread(crossbow::fire).start();
+
+        new Thread(crossbow::reload).start();
+    }
+}
+
+
+---
+join Methods
+
+Метод join() в Java предоставляется классом java.lang.Thread, 
+который позволяет одному потоку ждать завершения выполнения другим потоком. 
+Предположим, что th является объектом класса Thread, поток которого выполняет свое выполнение в данный момент, 
+тогда оператор th.join(); гарантирует, что th будет завершен до того, как программа выполнит следующую инструкцию.
+
+---
+пример
+
+// Example2.java
+public class JoinService {
+    public static void main(String[] args) {
+        ThreadJoin thread1 = new ThreadJoin();
+        ThreadJoin thread2 = new ThreadJoin();
+        ThreadJoin thread3 = new ThreadJoin();
+
+        thread1.start();
+
+        // start second thread after waiting for 2 seconds or if it's dead
+        try {
+            thread1.join(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        thread2.start();
+
+        // start third thread only when first thread is dead
+        try {
+            thread1.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        thread3.start();
+
+        // let all threads finish execution before finishing main thread
+        try {
+            thread1.join();
+            thread2.join();
+            thread3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("All threads has been terminated, exiting main thread");
+    }
+}
+
+public class ThreadJoin extends Thread {
+    @Override
+    public void run() {
+        System.out.println("Thread started " + Thread.currentThread().getName());
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Thread ended " + Thread.currentThread().getName());
+    }
+}
+
+
+---
+blocking queue
+Классы, реализующие blockQueue
+
+Мы напрямую не можем предоставить экземпляр BlockingQueue, поскольку это интерфейс, 
+поэтому для использования функциональности BlockingQueue нам нужно использовать классы, реализующие его
+
+для примера можно рассмотреть
+LinkedBlockingQueue
+ArrayBlockingQueue
+
+Начнем реализацию
+
+public class Message {
+
+    private final String msg;
+
+    public Message(String str) {
+        this.msg = str;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+}
+
+Класс сервис
+
+public class MessageService {
+
+    public static void main(String[] args) {
+        // Creating BlockingQueue of size 10
+        BlockingQueue<Message> queue = new ArrayBlockingQueue<>(10);
+        Producer producer = new Producer(queue);
+        Consumer consumer = new Consumer(queue);
+        // starting producer to produce messages in queue
+        new Thread(producer).start();
+
+        // starting consumer to consume messages from queue
+        new Thread(consumer).start();
+
+        System.out.println("Producer and Consumer has been started");
+    }
+
+}
+
+Класс Продьюсер - генерирует сообщения в очередь
+
+public class Producer implements Runnable {
+
+    private final BlockingQueue<Message> queue;
+
+    public Producer(BlockingQueue<Message> queue) {
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        // produce messages
+        for (int idx = 0; idx < 50; idx++) {
+            Message msg = new Message("" + idx);
+            try {
+                Thread.sleep(idx * 100);
+                queue.put(msg);
+                System.out.println("Produced " + msg.getMsg());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // adding exit message
+        Message msg = new Message("exit");
+        try {
+            queue.put(msg);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+Класс Консьюмер - забирает сообщения из очереди - самостоятельная на 10-15 минут
+
+Задача - реализовать класс Consumer, который будет монитором сообщений в очереди, 
+при входящем сообщении "exit" заканчивает работу.
+
+--
+решение
+
+public class Consumer implements Runnable {
+
+    private final BlockingQueue<Message> queue;
+
+    public Consumer(BlockingQueue<Message> queue) {
+        this.queue = queue;
+    }
+
+    @Override
+    public void run() {
+        try {
+            Message msg;
+            Thread.sleep(10000);
+            // consuming messages until exit message is received
+            while (!(msg = queue.take()).getMsg().equals("exit")) {
+                System.out.println("Consumed " + msg.getMsg());
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+

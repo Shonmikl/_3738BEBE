@@ -1,0 +1,133 @@
+В качестве примера возьмем сервис на JDBC, который записывает людей в систему по имени. 
+
+schema.sql:
+
+drop table BOOKINGS if exists;
+create table BOOKINGS(ID serial, FIRST_NAME varchar(5) NOT NULL);
+
+BookingService.java:
+
+@Component
+public class BookingService {
+
+  private final static Logger logger = LoggerFactory.getLogger(BookingService.class);
+
+  private final JdbcTemplate jdbcTemplate;
+
+  public BookingService(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
+
+  @Transactional
+  public void book(String... persons) {
+    for (String person : persons) {
+      logger.info("Booking " + person + " in a seat...");
+      jdbcTemplate.update("insert into BOOKINGS(FIRST_NAME) values (?)", person);
+    }
+  }
+
+  public List<String> findAllBookings() {
+    return jdbcTemplate.query("select FIRST_NAME from BOOKINGS",
+        (rs, rowNum) -> rs.getString("FIRST_NAME"));
+  }
+
+}
+
+Метод book помечен аннотацией @Transactional, что означает,
+что любой сбой приводит к откату всей операции к предыдущему состоянию и повторному созданию исходного исключения.
+Это означает, что ни один из людей не будет добавлен, если добавление хотя бы одного человека прервется.
+
+package com.example.managingtransactions;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ManagingTransactionsApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(ManagingTransactionsApplication.class, args);
+  }
+
+}
+
+Мы также имплементируем CommandLineRunner, который внедряет BookingService и демонстрирует различные варианты использования транзакций.
+
+@Component
+class AppRunner implements CommandLineRunner {
+
+  private final static Logger logger = LoggerFactory.getLogger(AppRunner.class);
+
+  private final BookingService bookingService;
+
+  public AppRunner(BookingService bookingService) {
+    this.bookingService = bookingService;
+  }
+
+  @Override
+  public void run(String... args) throws Exception {
+    bookingService.book("Alice", "Bob", "Carol");
+    Assert.isTrue(bookingService.findAllBookings().size() == 3,
+        "First booking should work with no problem");
+    logger.info("Alice, Bob and Carol have been booked");
+    try {
+      bookingService.book("Chris", "Samuel");
+    } catch (RuntimeException e) {
+      logger.info("v--- The following exception is expect because 'Samuel' is too " +
+          "big for the DB ---v");
+      logger.error(e.getMessage());
+    }
+
+    for (String person : bookingService.findAllBookings()) {
+      logger.info("So far, " + person + " is booked.");
+    }
+    logger.info("You shouldn't see Chris or Samuel. Samuel violated DB constraints, " +
+        "and Chris was rolled back in the same TX");
+    Assert.isTrue(bookingService.findAllBookings().size() == 3,
+        "'Samuel' should have triggered a rollback");
+
+    try {
+      bookingService.book("Buddy", null);
+    } catch (RuntimeException e) {
+      logger.info("v--- The following exception is expect because null is not " +
+          "valid for the DB ---v");
+      logger.error(e.getMessage());
+    }
+
+    for (String person : bookingService.findAllBookings()) {
+      logger.info("So far, " + person + " is booked.");
+    }
+    logger.info("You shouldn't see Buddy or null. null violated DB constraints, and " +
+        "Buddy was rolled back in the same TX");
+    Assert.isTrue(bookingService.findAllBookings().size() == 3,
+        "'null' should have triggered a rollback");
+  }
+
+}
+
+Таблица BOOKING Sимеет два ограничения на first_name:
+
+1. Имена не могут быть длиннее пяти символов.
+
+2. Имена не могут быть нулевыми.
+
+Первые три вставленных имени: Alice, Bob, и Carol. 
+
+В листинге видим, что к этой таблице добавились три человека. Если бы это не сработало, приложение закрылось бы раньше:
+
+c.e.managingtransactions.AppRunner       : Alice, Bob and Carol have been booked
+
+Далее выполняется еще одно бронирование для Chris и Samuel. Имя Samuel намеренно слишком длинное, что приводит к ошибке вставки. 
+
+Транзакционное поведение требует отката обоих (то есть всех значений в этой транзакции).Таким образом, в той таблице должно быть всего три человека:
+
+c.e.managingtransactions.AppRunner       : v--- The following exception is expect because 'Samuel' is too big for the DB ---v
+
+Наконец-то Buddy и null забронированы. Как видно из выходных данных, null также вызывает откат, оставляя тех же трех человек забронированными:
+
+c.e.managingtransactions.AppRunner       : You shouldn't see Buddy or null. null violated DB constraints, and Buddy was rolled back in the same TX
+
+
+
+
+

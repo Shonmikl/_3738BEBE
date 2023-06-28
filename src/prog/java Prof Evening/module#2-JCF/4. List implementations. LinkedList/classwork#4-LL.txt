@@ -1,0 +1,259 @@
+Связанный список является частью структуры коллекции, присутствующей в пакете java.util.
+
+
+Реализуем односвязный список
+Первая реализация без implements Iterable
+
+----
+NODE
+
+@Getter
+@Setter
+public class Node {
+    private Integer data;
+    private Node next;
+
+    public Node(Integer data, Node next) {
+        this.data = data;
+        this.next = next;
+    }
+}
+
+---
+ADD
+Добавить узел в голову:
+Новый узел всегда добавляется в голову данного связанного списка. 
+Добавленный узел становится новой головой связанного списка. 
+Например, если данный связанный список имеет вид 10->15->20->25 и мы добавляем элемент 5, тогда связанный список становится 5->10->15->20->25. 
+
+public void add(int data) {
+        Node newNode = new Node(data, null);
+        if (head == null) {
+            head = newNode;
+            return;
+        }
+
+        newNode.setNext(head);
+        head = newNode;
+    }
+
+временная сложность вставки узла в положение головы составляет O(1).
+
+---
+PUSH TO TAIL
+Добавить узел в хвост:
+Новый узел всегда добавляется после последнего узла данного связанного списка. 
+Например, если заданный связанный список 5->10->15->20->25 и мы добавляем элемент 30, тогда связанный список становится 5->10->15->20->25->30. 
+Поскольку мы не храним ссылку на хвост, мы должны пройти по списку до конца, а затем изменить предпоследний узел на новый узел.
+
+public void pushToTail(int data) {
+        Node newNode = new Node(data, null);
+
+        if (head == null) {
+            head = newNode;
+            return;
+        }
+
+        Node last = head;
+        while (last.getNext() != null) {
+            last = last.getNext();
+        }
+
+        last.setNext(newNode);
+    }
+
+Временная сложность добавления равна O(n), где n — количество узлов в связанном списке. 
+можно оптимизировать в O(1), сохраняя дополнительный указатель на конец связанного списка
+
+---
+PUSH TO INDEX
+
+public void pushToIndex(int index, int data) {
+        Node newNode = new Node(data, null);
+        Node current = head;
+        int jump;
+
+        if (index < 1) {
+            System.out.println("index out of bounds");
+        } else {
+            jump = 0;
+            while (jump < index - 1) {
+                current = current.getNext();
+                jump++;
+            }
+
+            newNode.setNext(current.getNext());
+            current.setNext(newNode);
+        }
+    }
+
+---
+Варианты с remove()
+
+1. Удалить с начала:
+Направьте голову на следующий узел, т.е. второй узел
+    голова = голова-> следующий
+2. Удалить с конца:
+Укажите заголовок на предыдущий элемент, т.е. последний второй элемент
+    темп->следующий = NULL
+3.Удалить по индексу:
+Переход к элементу перед удаляемым элементом
+Измените следующий указатель, чтобы исключить узел из цепочки
+
+
+    public boolean removeFirst() {
+        if (head == null) {
+            return false;
+        }
+
+        Node temp = head;
+        head = head.getNext();
+        temp.setNext(null);
+
+        return true;
+    }
+
+    public boolean removeLast() {
+        if (head == null) {
+            System.out.println("List is Empty");
+            return false;
+        }
+        Node current = head;
+        Node previous = null;
+
+        if (current.getNext() == null) {
+            head = null;
+        } else {
+            while (current.getNext() != null) {
+                previous = current;
+                current = current.getNext();
+            }
+
+            if (previous != null) {
+                previous.setNext(null); // remove last node
+            }
+        }
+        return true;
+    }
+
+    public boolean remove(int index) {
+        Node current = head;
+        int jump;
+        if (index < 1) {
+            System.out.println("index out of bounds");
+            return false;
+        } else {
+            jump = 0;
+            while (jump < index - 1) {
+                current = current.getNext();
+                jump++;
+            }
+            current.setNext(current.getNext().getNext());
+            return true;
+        }
+
+    }
+
+
+
+
+    public int get(int index) {
+        int count = -1;
+        if (head == null) {
+            return -1;
+        }
+        if (index < 0 || index > size()) {
+            return -1;
+        }
+        Node node = head;
+        while (node != null) {
+            count++;
+            if (count == index) {
+                return node.getData();
+            }
+            node = node.getNext();
+        }
+
+        return -1;
+    }
+
+
+
+    public int size() {
+        Node node;
+        int size = 0;
+        for (node = head; node != null; node = node.getNext()) {
+            size++;
+        }
+        return size;
+    }
+
+
+
+    public void print() {
+        Node node = head;
+        while (node != null) {
+            System.out.print(node.getData() + " ");
+            node = node.getNext();
+        }
+    }
+
+
+    public Node getHead() {
+        return head;
+    }
+
+---
+ITERABLE
+После реализации пробуем for-each loop
+
+public class Test {
+    public static void main(String[] args) {
+        MyLinkedList myLinkedList = new MyLinkedList();
+        myLinkedList.add(3);
+        myLinkedList.add(6);
+        myLinkedList.add(1);
+
+//        for(Integer i : myLinkedList) {
+//            System.out.println(i);
+//        }
+//
+//        MyLinkedListIterator myLinkedListIterator = new MyLinkedListIterator(myLinkedList);
+//
+//        while (myLinkedListIterator.hasNext()) {
+//            System.out.println(myLinkedListIterator.next());
+//        }
+    }
+}
+
+
+---
+добавляем implement Ierable<Integer>
+   @Override
+    public Iterator<Integer> iterator() {
+        return new MyLinkedListIterator(this);
+    }
+
+
+public class MyLinkedListIterator implements Iterator<Integer> {
+    Node current;
+    public MyLinkedListIterator(MyLinkedList list) {
+        current = list.getHead();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return current != null;
+    }
+
+    @Override
+    public Integer next() {
+        Integer data = current.getData();
+        current = current.getNext();
+        return data;
+    }
+}
+
+---
+
+

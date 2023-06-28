@@ -1,0 +1,123 @@
+---
+try-catch
+
+// Example1.java
+public static void main(String[ ] args) {
+    int[] myNumbers = {1, 2, 3};
+    System.out.println(myNumbers[10]);
+  }
+
+Если возникает ошибка, мы можем использовать try...catch, чтобы поймать ошибку и обработать ее
+
+// Example1.java
+public static void main(String[ ] args) {
+    try {
+      int[] myNumbers = {1, 2, 3};
+      System.out.println(myNumbers[10]);
+    } catch (Exception e) {
+      System.out.println("The catch block!");
+    }
+  }
+
+--
+finally block
+
+// Example1.java
+public static void main(String[] args) {
+    try {
+      int[] myNumbers = {1, 2, 3};
+      System.out.println(myNumbers[10]);
+    } catch (Exception e) {
+      System.out.println("The catch block!");
+    } finally {
+      System.out.println("After try-catch.");
+    }
+  }
+
+---
+подумаем вместе
+перепишите код представленный на слайде
+
+// Example2.java
+ответ
+try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+        return br.readLine();
+    }
+
+---
+Практический пример - пишем вместе со студентами
+демонстрируем основные методы, после можем рассказать немного об остальных
+
+FileInputStream
+
+// Example3.java
+ public static void main(String[] args) throws IOException {
+        FileInputStream inputStream = new FileInputStream("<path>/file.txt");
+        
+        // Illustrating available method
+        System.out.println("Number of remaining bytes:" + inputStream.available());
+
+        // Illustrating skip() method
+        inputStream.skip(4);
+
+        // Illustrating read() method
+        int ch;
+        while ((ch = inputStream.read()) != -1) {
+            System.out.print((char) ch);
+        }
+
+        // Illustrating getChannel() method
+        System.out.println(inputStream.getChannel());
+
+        // Illustrating getFD() method
+        System.out.println(inputStream.getFD());
+
+        // Illustrating close() method
+        inputStream.close();
+    }
+
+getChannel() - Возвращает уникальный объект FileChannel, связанный с входным потоком этого файла.
+getFD() - Возвращает объект FileDescriptor файла из системы.
+
+---
+FileOutputStream
+
+--
+
+// Example4.java (one() method)
+method write()
+public static void main(String[] args){
+        String data = "This is file output stream";
+ 
+        try {
+            FileOutputStream output = new FileOutputStream("test.txt");
+            byte[] array = data.getBytes();
+
+            output.write(array);
+            output.close();
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+    }
+
+--
+method flush()
+используется для сброса содержимого буфера в выходной поток. 
+Буфер — это часть памяти, которая используется для хранения потока данных. Чтобы не ждать заполнения буфера для отправки используем метод flush().
+
+// todo придумать лучший пример
+// Example4.java (two() method)
+public static void main(String[] args) {  
+      try {  
+         OutputStream outputStream = new FileOutputStream("test.txt");  
+         InputStream inputStream = new FileInputStream("test.txt");  
+         outputStream.write('A');  
+         outputStream.flush();  
+         outputStream.write('B');  
+         System.out.println("" + (char)inputStream.read());  
+      } catch (Exception e) {  
+         e.getStackTrace();  
+      }  
+   }  
+
+

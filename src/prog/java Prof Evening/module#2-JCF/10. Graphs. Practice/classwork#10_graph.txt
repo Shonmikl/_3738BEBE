@@ -1,0 +1,352 @@
+---
+Типы графов
+---
+Note -> называйте и рисуйте, сделайте себе шпаргалку для каждого типа на листе
+
+Null Graph - Граф называется нулевым графом, если в графе нет ребер, т.е. только изолированные вершины без ребер, соединяющих любую пару вершин.
+
+Trivial Graph - Граф, содержит только одну вершину и не содержит ребер.
+
+Undirected Graph (Неориентированный граф) - Граф, ребра которого не имеют направления. То есть узлы представляют собой неупорядоченные пары в определении каждого ребра. 
+
+Directed Graph - Граф, в котором ребро имеет направление. То есть узлы являются упорядоченными парами в определении каждого ребра
+
+Note -> Примером неориентированного графа является карта дорог, переписка людей, Примером ориентированного графа – река с притоками.
+
+Connected Graph - Граф, в котором из одного узла мы можем посетить любой другой узел в графе, называется связным графом. 
+
+Disconnected Graph - Граф, в котором хотя бы один узел недоступен из узла, называется несвязным графом
+
+Regular Graph - Граф, в котором степень каждой вершины равна степени других вершин графа
+
+Complete Graph - Граф, в котором из каждого узла есть ребро в каждый другой узел.
+
+Cycle Graph - Граф, в котором граф сам по себе является циклом
+
+Cyclic Graph - Граф, содержащий хотя бы один цикл, называется циклическим графом
+
+Directed Acyclic Graph (Направленный ациклический граф) - Направленный граф, не содержащий циклов
+
+Bipartite Graph - Граф, вершины которого можно разделить на два множества так, что вершины в каждом множестве не содержат ни одного ребра между ними.
+
+Weighted Graph - Граф, в котором ребра уже указаны с подходящим весом, называется взвешенным графом. 
+Взвешенные графы могут быть дополнительно классифицированы как ориентированные взвешенные графы и неориентированные взвешенные графы. 
+
+---
+Хранение Графа в памяти
+---
+Матрица смежности
+Самый популярный и расточительный способ представления графа в памяти. 
+Лучше использовать, если количество рёбер велико.
+
+Для хранения рёбер используется двумерная матрица размерности [V, V], каждый [a, b] элемент которой равен 1, если вершины a и b являются смежными и 0 в противном случае. 
+
+Матрица смежности может привести к ошибкам, если записи не сделаны в правильных столбцах и строках.
+Во время выполнения вы не очень уверены, какая строка / столбец представляет какое ребро.
+Представьте огромную матрицу и ввод становиться еще сложнее, так как имеем уже большое количество вершин.
+
+
+---
+Списки смежности
+Здесь используется односвязный список для перечисления всех смежных вершин.
+
+---
+Использование Граф
+Note -> напомнить что такое топологическая сортировка
+
+Топологическая сортировка (Topological sort)
+Задача топологической сортировки графа состоит в: указать такой линейный порядок на его вершинах, чтобы любое ребро вело от вершины с меньшим номером к вершине с большим номером.
+
+---
+Практика
+---
+1. Graph Implementation in Java
+
+// Example1.java
+@AllArgsConstructor
+@Getter
+@Setter
+public class Edge {
+    private int source;
+    private int destination;
+}
+
+--
+// Example1.java
+public class Graph {
+    @Getter
+    private List<List<Integer>> adjacencyList = new ArrayList<>();
+
+    public Graph(List<Edge> edges) {
+        // find the vertex with the maximum number
+        int vertex = 0;
+        for (Edge edge : edges) {
+            vertex = Integer.max(vertex, Integer.max(edge.getSource(), edge.getDestination()));
+        }
+
+        // allocate memory for the adjacency list
+        for (int i = 0; i <= vertex; i++) {
+            adjacencyList.add(i, new LinkedList<>());
+        }
+
+        // adding edges to directed graph
+        for (Edge current : edges) {
+            // allocate a new node in the adjacency list from source to destination
+            adjacencyList.get(current.getSource()).add(current.getDestination());
+
+            // for undirected Graph
+            // allocate a new node in the adjacency list from destination to source
+            // adjList.get(current.dest).add(current.getSource());
+        }
+    }
+}
+
+--
+// Example1.java
+public class Util {
+    public static void printGraph(Graph graph) {
+        int source = 0;
+        int size = graph.getAdjacencyList().size();
+
+        if (source < size) {
+            do {
+                for (int dest : graph.getAdjacencyList().get(source)) {
+                    System.out.print("[" + source + "—> " + dest + "]");
+                }
+                System.out.println();
+                source++;
+            } while (source < size);
+        }
+    }
+}
+
+--
+// Example1.java
+public class Test {
+    public static void main (String[] args)
+    {
+        List<Edge> edges = new ArrayList<>();
+        edges.add(new Edge(0, 1));
+        edges.add(new Edge(1, 2));
+        edges.add(new Edge(2, 0));
+        edges.add(new Edge(2, 1));
+        edges.add(new Edge(3, 2));
+        edges.add(new Edge(4, 5));
+        edges.add(new Edge(5, 4));
+
+        Graph graph = new Graph(edges);
+        Util.printGraph(graph);
+    }
+}
+
+
+---
+2. Weighted Graph Implementation
+
+// Example2.java
+@AllArgsConstructor
+@Getter
+@Setter
+public class Edge {
+    private int source;
+    private int destination;
+    private int weight;
+}
+
+--
+// Example2.java
+@AllArgsConstructor
+@Getter
+@Setter
+public class Node {
+    private int value;
+    private int weight;
+
+    @Override
+    public String toString() {
+        return this.value + " (" + this.weight + ")";
+    }
+}
+
+--
+// Example2.java
+public class Graph {
+    @Getter
+    private List<List<Node>> adjacencyList = new ArrayList<>();
+
+    public Graph(List<Edge> edges) {
+        // find the vertex with the maximum number
+        int vertex = 0;
+        for (Edge edge : edges) {
+            vertex = Integer.max(vertex, Integer.max(edge.getSource(), edge.getDestination()));
+        }
+
+        // allocate memory for the adjacency list
+        for (int i = 0; i <= vertex; i++) {
+            adjacencyList.add(i, new LinkedList<>());
+        }
+
+        // adding edges to directed graph
+        for (Edge current : edges) {
+            // allocate a new node in the adjacency list from source to destination
+            adjacencyList.get(current.getSource()).add(new Node(current.getDestination(), current.getWeight()));
+
+            // for undirected Graph
+            // allocate a new node in the adjacency list from destination to source
+            // adjList.get(current.dest).add(new Node(current.getSource(), current.getWeight()));
+        }
+    }
+}
+
+--
+// Example2.java
+public class Util {
+    public static void printGraph(Graph graph) {
+        int source = 0;
+        int size = graph.getAdjacencyList().size();
+
+        if (source < size) {
+            do {
+                for (Node dest : graph.getAdjacencyList().get(source)) {
+                    System.out.print("[" + source + "—> " + dest + "]");
+                }
+                System.out.println();
+                source++;
+            } while (source < size);
+        }
+    }
+}
+
+--
+// Example2.java
+public class Test {
+    public static void main (String[] args)
+    {
+        List<Edge> edges = new ArrayList<>();
+        edges.add(new Edge(0, 1, 6));
+        edges.add(new Edge(1, 2, 5));
+        edges.add(new Edge(2, 0, 8));
+        edges.add(new Edge(2, 1, 3));
+        edges.add(new Edge(3, 2, 9));
+        edges.add(new Edge(4, 5, 1));
+        edges.add(new Edge(5, 4, 3));
+
+        Graph graph = new Graph(edges);
+        Util.printGraph(graph);
+    }
+}
+
+---
+// todo не самое лучшее задание, надо разбираться
+3. Сheck if graph is complete
+Решение использует для построения графа матрицу смежности
+
+Неориентированный граф называется полным, если любая пара его различных вершин соединена хотя бы одним ребром.
+Для заданного списком рёбер графа проверьте, является ли он полным.
+
+// Example3.java
+public class Task3 {
+    private static final Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+
+        int n = scanner.nextInt();
+        int m = scanner.nextInt();
+        int[][] array = new int[n][m];
+
+        for (int i = 0; i < array.length; i++) {
+            int a = scanner.nextInt();
+            int b = scanner.nextInt();
+
+            array[a][b] = array[b][a] = 1;
+        }
+
+        System.out.println(isCompletedGraph(array, n, m));
+    }
+
+    private static boolean isCompletedGraph(int[][] array, int n, int m) {
+
+        for (int i = 1; i < n; i++) {
+            for (int j = i + 1; j < m; j++) {
+                if (array[i][j] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
+
+// todo разобраться
+6. Find the number of islands
+
+//Example4.java
+Идея состоит в том, чтобы сохранить дополнительную матрицу для отслеживания посещенных узлов в данной матрице и
+выполнить поиск в глубину, чтобы найти общее количество островов.
+
+ public class Task6 {
+    static final int ROW = 5, COLUMN = 5;
+
+    public static void main(String[] args) {
+        int[][] array = new int[][]{{1, 1, 0, 0, 0},
+                {0, 1, 0, 0, 1},
+                {1, 0, 0, 1, 1},
+                {0, 0, 0, 0, 0},
+                {1, 0, 1, 0, 1}};
+
+        System.out.println(countIslands(array));
+    }
+
+    static int countIslands(int[][] array) {
+        // Make a bool array to mark visited cells. Initially all cells are unvisited
+        boolean[][] visited = new boolean[ROW][COLUMN];
+
+        // Initialize count as 0 and traverse through the all cells of given matrix
+        int count = 0;
+        for (int i = 0; i < ROW; ++i)
+            for (int j = 0; j < COLUMN; ++j)
+                if (array[i][j] == 1 && !visited[i][j]) {
+                    DFS(array, i, j, visited);
+                    ++count;
+                }
+
+        return count;
+    }
+
+    /**
+     *  A function to check if a given cell (row, col) can be included in DFS
+     */
+    private static boolean isSafe(int[][] M, int row, int col, boolean[][] visited) {
+        // row number is in range, column number is in range and value is 1 and not yet visited
+        return (row >= 0) 
+                && (row < ROW) 
+                && (col >= 0)
+                && (col < COLUMN)
+                && (M[row][col] == 1 && !visited[row][col]);
+    }
+
+    /**
+     *     A utility function to do DFS for a 2D boolean matrix.
+     *     It only considers the 8 neighbors as adjacent vertices
+     */
+    private static void DFS(int[][] M, int row, int col, boolean[][] visited) {
+        // These arrays are used to get row and column numbers of 8 neighbors of a given cell
+        int[] rowNeighbor = new int[]{-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] colNeighbor = new int[]{-1, 0, 1, -1, 1, -1, 0, 1};
+        // Mark this cell as visited
+        visited[row][col] = true;
+
+        // Recur for all connected neighbours
+        for (int i = 0; i < 8; i++) {
+            if (isSafe(M, row + rowNeighbor[i], col + colNeighbor[i], visited)) {
+                DFS(M, row + rowNeighbor[i], col + colNeighbor[i], visited);
+            }
+        }
+    }
+
+
+}
+
+полезный ресурс.
+https://graphonline.ru/

@@ -1,0 +1,325 @@
+Создадим простой проект в котором создадим валидацию, обработк ошибок и научимся выполнять простые MockTests(подробнее о тестах будет говориться в заключительных лекциях)
+
+pom.xml:
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+<dependency> 
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency> 
+<dependency> 
+    <groupId>com.h2database</groupId> 
+    <artifactId>h2</artifactId>
+    <version>1.4.197</version> 
+    <scope>runtime</scope>
+</dependency>
+<dependency> 
+    <groupId>org.springframework.boot</groupId> 
+    <artifactId>spring-boot-starter-validation</artifactId> 
+</dependency>
+
+User.java:
+
+@Entity
+public class User {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+    
+    @NotBlank(message = "Name is mandatory")
+    private String name;
+    
+    @NotBlank(message = "Email is mandatory")
+    private String email;
+    
+    // standard constructors / setters / getters / toString
+        
+}
+
+Поскольку мы будем использовать Spring Data JPA для сохранения пользователей в базе данных H2 в памяти, нам также необходимо определить простой интерфейс репозитория для использования базовых функций CRUD для объектов User :
+
+@Repository
+public interface UserRepository extends CrudRepository<User, Long> {}
+
+UserController:
+
+@RestController
+public class UserController {
+
+    @PostMapping("/users")
+    ResponseEntity<String> addUser(@Valid @RequestBody User user) {
+        // persisting the user
+        return ResponseEntity.ok("User is valid");
+    }
+    
+    // standard constructors / other methods
+    
+}
+
+Хотя Spring Boot действительно удобно проверять объект User , автоматически передаваемый методу addUser() , недостающим аспектом этого процесса является то, как мы обрабатываем результаты проверки.
+
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public Map<String, String> handleValidationExceptions(
+  MethodArgumentNotValidException ex) {
+    Map<String, String> errors = new HashMap<>();
+    ex.getBindingResult().getAllErrors().forEach((error) -> {
+        String fieldName = ((FieldError) error).getField();
+        String errorMessage = error.getDefaultMessage();
+        errors.put(fieldName, errorMessage);
+    });
+    return errors;
+}
+
+Тестирование (немного рассказать о том как это работает и для чего необходимо):
+
+@RunWith(SpringRunner.class) 
+@WebMvcTest
+@AutoConfigureMockMvc
+public class UserControllerIntegrationTest {
+
+    @MockBean
+    private UserRepository userRepository;
+    
+    @Autowired
+    UserController userController;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    //...
+    
+}
+
+Протестируем метод addUser() с допустимым и недопустимым объектом User , переданным в теле запроса:
+
+@Test
+public void whenPostRequestToUsersAndValidUser_thenCorrectResponse() throws Exception {
+    MediaType textPlainUtf8 = new MediaType(MediaType.TEXT_PLAIN, Charset.forName("UTF-8"));
+    String user = "{\"name\": \"bob\", \"email\" : \"bob@domain.com\"}";
+    mockMvc.perform(MockMvcRequestBuilders.post("/users")
+      .content(user)
+      .contentType(MediaType.APPLICATION_JSON_UTF8))
+      .andExpect(MockMvcResultMatchers.status().isOk())
+      .andExpect(MockMvcResultMatchers.content()
+        .contentType(textPlainUtf8));
+}
+
+@Test
+public void whenPostRequestToUsersAndInValidUser_thenCorrectResponse() throws Exception {
+    String user = "{\"name\": \"\", \"email\" : \"bob@domain.com\"}";
+    mockMvc.perform(MockMvcRequestBuilders.post("/users")
+      .content(user)
+      .contentType(MediaType.APPLICATION_JSON_UTF8))
+      .andExpect(MockMvcResultMatchers.status().isBadRequest())
+      .andExpect(MockMvcResultMatchers.jsonPath("$.name", Is.is("Name is mandatory")))
+      .andExpect(MockMvcResultMatchers.content()
+        .contentType(MediaType.APPLICATION_JSON_UTF8));
+    }
+}
+
+Запускаем приложение, сохраняя в нем двух Users:
+
+@SpringBootApplication
+public class Application {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+    
+    @Bean
+    public CommandLineRunner run(UserRepository userRepository) throws Exception {
+        return (String[] args) -> {
+            User user1 = new User("Bob", "bob@domain.com");
+            User user2 = new User("Jenny", "jenny@domain.com");
+            userRepository.save(user1);
+            userRepository.save(user2);
+            userRepository.findAll().forEach(System.out::println);
+        };
+    }
+}
+
+Проверяем запрос.
+
+Задание:
+1. Создайте класс Blog с полями:
+id - генерируется автоматически
+blogTitle - не может быть нулем и имеет минимальную длину - 2 символа
+blogBody - не должен быть пустым
+blogEmail - с валидацией на почту
+
+2. Выполните вызов всех блогов с помощью RestApi (url : /blogs)
+3. Выполните сохранение блогов с помощью RestApi (url :/blog)
+4. Проверьте запросы (Postman или в браузере)
+
+Различия между @Valid и @Validated
+
+Создадим класс UserAccount с полями password и name (и с соответсвующей проверкой):
+
+public class UserAccount {
+
+    @NotNull
+    @Size(min = 4, max = 15)
+    private String password;
+
+    @NotBlank
+    private String name;
+
+    // standard constructors / setters / getters / toString
+     
+}
+
+Далее рассмотрим контроллер. Здесь у нас будет метод saveBasicInfo с аннотацией @Valid для проверки ввода пользователя:
+
+@RequestMapping(value = "/saveBasicInfo", method = RequestMethod.POST)
+public String saveBasicInfo(
+  @Valid @ModelAttribute("useraccount") UserAccount useraccount, 
+  BindingResult result, 
+  ModelMap model) {
+    if (result.hasErrors()) {
+        return "error";
+    }
+    return "success";
+}
+
+Для этого примера мы используем совершенно простой front-end, чтобы также рассмотреть способ создания full-stack приложения с помощью Spring:
+
+error.html:
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>SpringValidation</title>
+</head>
+
+<body>
+	<h3>Error!!!</h3>
+</body>
+</html>
+
+success.html:
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>SpringValidation</title>
+</head>
+
+<body>
+	<h3>SUCCESS!!!</h3>
+</body>
+</html>
+
+Создадим небольшой тест: 
+
+@Test
+public void givenSaveBasicInfo_whenCorrectInput_thenSuccess() throws Exception {
+    this.mockMvc.perform(MockMvcRequestBuilders.post("/saveBasicInfo")
+      .accept(MediaType.TEXT_HTML)
+      .param("name", "test123")
+      .param("password", "pass"))
+      .andExpect(view().name("success"))
+      .andExpect(status().isOk())
+      .andDo(print());
+}
+
+Убедившись, что тест проходит успешно, мы расширим функциональность. ервый шаг с именем и паролем остается без изменений. На втором этапе мы получим дополнительную информацию, например возраст  и  номер телефона .
+
+public class UserAccount {
+    
+    @NotNull
+    @Size(min = 4, max = 15)
+    private String password;
+ 
+    @NotBlank
+    private String name;
+ 
+    @Min(value = 18, message = "Age should not be less than 18")
+    private int age;
+ 
+    @NotBlank
+    private String phone;
+    
+    // standard constructors / setters / getters / toString   
+    
+}
+
+Теперь предыдущий тест не проходит. Почему?
+
+Это связано с тем, что мы не пропускаем поля возраста и телефона , которых по-прежнему нет на картинке в пользовательском интерфейсе . Для поддержки такого поведения нам потребуется групповая проверка и аннотация @Validated .
+
+Для этого нам нужно сгруппировать поля, создав две отдельные группы. Во-первых, нам нужно создать два интерфейса маркеров, отдельный для каждой группы или каждого шага. Мы можем обратиться к нашей статье о групповой проверке для точной реализации этого. Здесь давайте сосредоточимся на различиях в аннотациях.
+
+У нас будет интерфейс BasicInfo для первого шага и AdvanceInfo  для второго шага. Кроме того, мы обновим наш класс UserAccount , чтобы использовать эти интерфейсы маркеров:
+
+public class UserAccount {
+    
+    @NotNull(groups = BasicInfo.class)
+    @Size(min = 4, max = 15, groups = BasicInfo.class)
+    private String password;
+ 
+    @NotBlank(groups = BasicInfo.class)
+    private String name;
+ 
+    @Min(value = 18, message = "Age should not be less than 18", groups = AdvanceInfo.class)
+    private int age;
+ 
+    @NotBlank(groups = AdvanceInfo.class)
+    private String phone;
+    
+    // standard constructors / setters / getters / toString   
+    
+}
+
+Кроме того, мы обновим наш контроллер, чтобы использовать аннотацию @Validated вместо @Valid :
+
+@RequestMapping(value = "/saveBasicInfoStep1", method = RequestMethod.POST)
+public String saveBasicInfoStep1(
+  @Validated(BasicInfo.class) 
+  @ModelAttribute("useraccount") UserAccount useraccount, 
+  BindingResult result, ModelMap model) {
+    if (result.hasErrors()) {
+        return "error";
+    }
+    return "success";
+}
+
+В результате этого обновления наш тест теперь проходит успешно. Мы также протестируем этот новый метод:
+
+@Test
+public void givenSaveBasicInfoStep1_whenCorrectInput_thenSuccess() throws Exception {
+    this.mockMvc.perform(MockMvcRequestBuilders.post("/saveBasicInfoStep1")
+      .accept(MediaType.TEXT_HTML)
+      .param("name", "test123")
+      .param("password", "pass"))
+      .andExpect(view().name("success"))
+      .andExpect(status().isOk())
+      .andDo(print());
+}
+
+Аннотация @Valid используется для обозначения вложенных атрибутов, в частности . Это запускает проверку вложенного объекта. Например, в нашем текущем сценарии мы можем создать объект UserAddress  :
+
+public class UserAddress {
+
+    @NotBlank
+    private String countryCode;
+
+    // standard constructors / setters / getters / toString
+}
+
+Чтобы обеспечить проверку этого вложенного объекта, мы украсим атрибут аннотацией @Valid :
+
+public class UserAccount {
+    
+    //...
+    
+    @Valid
+    @NotNull(groups = AdvanceInfo.class)
+    private UserAddress useraddress;
+    
+    // standard constructors / setters / getters / toString 
+}

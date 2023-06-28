@@ -1,0 +1,484 @@
+---
+Операторы == и !=
+== и != могут сказать, одинаковы ли Java-объекты или нет соответственно. 
+
+---
+Примитивы
+Для примитивных типов быть одинаковым означает иметь одинаковые значения!!!
+
+// Example1.java (method primitiveExample())
+ public static void main(String[] args) {
+        int a = 1;
+        int b = 1;
+        boolean isEqualsPrimitive = a == b;
+    }
+
+C автоматической распаковкой это также работает при сравнении примитивного значения с его классом-оберткой:
+
+// Example1.java (method primitiveAnotherExample())
+    public static void main(String[] args) {
+        int a = 1;
+        Integer b = new Integer(1); // removal, only for example
+        boolean isEqualsPrimitive = a == b;
+    }
+
+Если две целочисленные переменные имеют разные значения, оператор == вернет false, а оператор != вернет true.
+
+---
+Обьекты
+
+Класс Object
+Все классы в Java считаются унаследованными от класса Object
+в классе-наследнике появляются все методы класса Object. Эффект наследования
+среди таких методов есть equals() и метод hashCode()
+
+boolean equals(Object obj) Сравнивает текущий объект и переданный объект
+int hashCode() Возвращает hash-code текущего объекта
+
+// Example1.java (method objectExample())
+class Cat {
+   String name;
+   int age;
+	
+   // тут есть дифолтивная реализация для equals и hashCode
+}
+
+Унаследованный от класса Object метод equals() содержит самый простой алгоритм сравнивания текущего и переданного объектов — сравнивает ссылки.
+
+// Example1.java (method objectExample())
+Cat one = new Cat();
+Cat two = new Cat();
+
+one.equals(two);
+
+---
+Подумаем и реализуем наш метод equals() для класса Cat
+
+вариант 1: в метод equals передали тот же самый объект, у которого вызвали метод equals. 
+Если ссылки у текущего и переданного объектов равны, возвращаем true.
+
+// Example2.java (method equals())
+public boolean equals(Object obj) {
+   if (this == obj)
+    return true;
+}
+
+вариант 2: в метод equals передали ссылку null — сравнивать не с чем. 
+Объект, у которого вызвали метод equals, точно не null, возвращаем false.
+
+// Example2.java (method equalsAnother())
+public boolean equals(Object obj) {
+   if (this == obj)
+      return true;
+
+   if (obj == null)
+      return false;
+}
+
+вариант 3: в метод equals передали ссылку на объект вообще не класса Cat, возвращаем false.
+
+// Example2.java (method equalsAnotherOne())
+public boolean equals(Object obj) {
+   if (this == obj)
+      return true;
+
+   if (obj == null)
+      return false;
+
+   if (!(obj instanceof Person))
+      return false;
+}
+
+вариант 4: проверили и убедились выше, что наш обьект это Cat
+преобразовываем его к типу Cat и будем сравнивать внутренности обоих объектов
+Обьекты будут равны, если равно их содержимое
+
+// Example2.java (method equalsAnotherOneCat())
+public boolean equals(Object obj) {
+   if (this == obj)
+      return true;
+
+   if (obj == null)
+      return false;
+
+   if (!(obj instanceof Cat))
+      return false;
+
+   Cat cat = (Cat) obj;
+
+   return this.name == cat.name && this.age == cat.age;
+}
+
+---
+Note -> можно спросить о том все ли верно тут, потому что name это String
+
+Ответ:
+поле name имеет тип String, а значит, поля name нужно сравнивать с помощью вызова метода equals
+поле name вполне себе может быть равным null: тогда вызвать метод equals у него нельзя, проверка на null
+если name равно null в обоих Котах, имена равны
+
+добавить в код 
+
+if (this.age != person.age)
+   return false;
+
+if (this.name == null)
+   return person.name == null;
+
+return this.name.equals(person.name);
+
+---
+Note -> самостоятельная работа, написать equals
+Есть класс
+class Person {
+	int year;
+	Address address;
+}
+
+otvet:
+    public boolean equals(Object o) {
+        if (this == obj)
+      return true;
+
+   if (obj == null)
+      return false;
+
+   if (!(obj instanceof Person))
+      return false;
+
+   Cat cat = (Cat) obj;
+
+        Person person = (Person) o;
+        return year == person.year && address.equals(person.address);
+    }
+
+---
+Напомнить про HashCode
+
+Быстрое сравнение объектов — hashCode()
+Если его вызвать у объекта, то он вернет некое число. 
+Это число обладает такими свойствами:
+
+- У одинаковых объектов всегда одинаковые hash-code
+- У разных объектов разные hash-code, но могут быть одинаковые (коллизия)
+- Если у объектов разные hash-code, объекты точно разные
+
+Сначала у двух объектов вычисляются hash-code. 
+Если эти hash-code разные, то объекты точно разные, и сравнивать их дальше не нужно.
+Если hash-code одинаковые, сравнить объекты с помощью equals.
+
+---
+важно
+если пишите свою реализацию метода equals() вместо стандартной (из класса Object), также должны написать свою реализацию метода hashCode()
+Контракт
+Если вы добавляете в свой класс только реализацию одного метода equals() или только hashCode(), вы нарушаете контракт. Так делать нельзя!
+
+---
+Интересно что:
+Все коллекции в Java при поиске элемента внутри коллекции сначала сравнивают hash-code объектов, а только потом вызывают для сравнения метод equals
+
+---
+Компаратор интерфейс
+
+Способ 1. Один из очевидных подходов — написать собственную функцию sort() 
+---
+Note -> Задать вопрос о том кто какие помнит/знает алгоритмы сортировки
+
+Способ 2: использование интерфейса компаратора.
+Интерфейс компаратора используется для упорядочения объектов определенного пользователем класса. 
+Этот интерфейс присутствует в пакете java.util и содержит 2 метода compare(Object obj1, Object obj2) и equals (Object obj).
+Используя компаратор, мы можем сортировать элементы на основе данных.
+
+Как работает метод sort() класса Collections? 
+- Внутри метод Sort вызывает метод Compare сортируемых классов.
+- Чтобы сравнить два элемента, он спрашивает: «Какой из них больше?»
+- Метод сравнения возвращает -1, 0 или 1, чтобы сказать, меньше, равно или больше другого.
+- Он использует этот результат, чтобы затем определить, следует ли их поменять местами для их сортировки.
+
+---
+Пример
+Начать можно с коллекции заполненной числами, затем строками, а после уже реализовать свой класс.
+
+Используем класс Person, который написали раньше, добавив в него поле Имя, конструктор и туСтринг
+
+// Example3.java
+public class Person {
+    int year;
+    Address address;
+    String name;
+
+    public Person(int year, Address address, String name) {
+        this.year = year;
+        this.address = address;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "year=" + year +
+                ", name='" + name + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return year == person.year && address.equals(person.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(year, address);
+    }
+}
+
+---
+класс
+
+// Example3.java
+public class SortByYear implements Comparator<Person> {
+
+    @Override
+    public int compare(Person person1, Person person2) {
+        return person1.year - person2.year;
+    }
+}
+
+---
+класс
+
+// Example3.java
+public class SortByName implements Comparator<Person> {
+
+    @Override
+    public int compare(Person person1, Person person2) {
+        return person1.name.compareTo(person2.name);
+    }
+}
+
+---
+тест
+
+// Example3.java
+public static void main(String[] args)
+    {
+ 
+        ArrayList<Person> list = new ArrayList<>();
+
+        list.add(new Person(1997, null, "Aleks"));
+        list.add(new Person(2000, null, "Thomas"));
+        list.add(new Person(1980, null, "Michael"));
+
+
+        for (int i = 0; i < list.size(); i++){
+            System.out.println(list.get(i));
+}
+ 
+        Collections.sort(ar, new SortByYear());
+ 
+        for (int i = 0; i < list.size(); i++){
+            System.out.println(list.get(i));
+}
+ 
+        Collections.sort(list, new SortByName());
+
+        for (int i = 0; i < list.size(); i++){
+            System.out.println(list.get(i));
+}
+    }
+
+---
+Сортировка коллекции по более чем одному полю
+
+// Example3.java
+public class CustomSortingComparator implements Comparator<Person> {
+
+    @Override
+    public int compare(Person person1, Person person2) {
+        int nameCompare = person1.name.compareTo(person2.name);
+        int yearCompare = person1.year - person2.year;
+
+        return nameCompare == 0 ? yearCompare : nameCompare;
+    }
+}
+
+---
+Note -> Можно организовать сравнение не только по двум полям.
+
+---
+Тест
+public static void main(String[] args)
+    {
+        List<Person> list = new ArrayList<>();
+
+        Person obj1 = new Person(1990, null, "Aleks");
+        Person obj2 = new Person(2020, null, "Thea");
+        Person obj3 = new Person(1990, null, "Gnom");
+        Person obj4 = new Person(2490, null, "Liza");
+        Person obj5 = new Person(2000, null, "Foma");
+        
+        list.add(obj1);
+        list.add(obj2);
+        list.add(obj3);
+        list.add(obj4);
+        list.add(obj5);
+
+
+        // Iterating using Iterator before Sorting ArrayList
+        Iterator<Person> iterator = list.iterator();
+        
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+
+        // Sorting using sort method of Collections class
+        Collections.sort(list, new CustomSortingComparator());
+
+        // Iterating using enhanced for-loop after Sorting ArrayList
+        for (Person person : list) {
+            System.out.println(person);
+        }
+    }
+
+
+---
+Interface Comparable
+
+---
+Note -> задачи можно создать в отдельных пакетах этой лекции
+
+Task 1
+
+---
+Тест
+// Example4.java
+public class TaskOne {
+    public static void main(String[] args) {
+        Pair[] arr = new Pair[4];
+
+        arr[0] = new Pair("abc", 3);
+        arr[1] = new Pair("a", 4);
+        arr[2] = new Pair("bc", 5);
+        arr[3] = new Pair("a", 2);
+        
+        Arrays.sort(arr);
+        print(arr);
+    }
+
+    public static void print(Pair[] arr) {
+        for (Pair pair : arr) {
+            System.out.println(pair);
+        }
+    }
+}
+
+---
+класс
+// Example4.java
+public class Pair implements Comparable<Pair> {
+    String x;
+    int y;
+
+    public Pair(String x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public String toString() {
+        return "(" + x + "," + y + ")";
+    }
+
+    @Override
+    public int compareTo(Pair a) {
+        // if the string are not equal
+        if (this.x.compareTo(a.x) != 0) {
+            return this.x.compareTo(a.x);
+        } else {
+            // we compare int values if the strings are equal
+            return this.y - a.y;
+        }
+    }
+}
+
+---
+Тask 2
+
+начнут самостоятельно, начать писать код через 3-5 минут
+
+---
+класс
+class Pair implements Comparable<Pair> {
+    String firstName;
+    String lastName;
+
+    public Pair(String x, String y) {
+        this.firstName = x;
+        this.lastName = y;
+    }
+
+    public String toString() {
+        return "( " + firstName + " , " + lastName + " )";
+    }
+
+    @Override
+    public int compareTo(Pair a) {
+        // if the string are not equal
+        if (this.firstName.compareTo(a.firstName) != 0) {
+            return this.firstName.compareTo(a.firstName);
+        } else {
+            // we compare lastName if firstNames are equal
+            return this.lastName.compareTo(a.lastName);
+        }
+    }
+}
+
+--- 
+Тест - если придумать внятные имена и фамилии - будет лучше
+
+public class TaskTwo {
+    public static void main(String[] args)
+    {
+        Pair[] arr = new Pair[4];
+        arr[0] = new Pair("raj", "kashup"); 
+        arr[1] = new Pair("rahul", "singh");
+        arr[2] = new Pair("reshmi", "dubey");
+        arr[3] = new Pair("rahul", "jetli");
+        
+        Arrays.sort(arr);
+        print(arr);
+    }
+
+    public static void print(Pair[] arr)
+    {
+        for (Pair pair : arr) {
+            System.out.println(pair);
+        }
+    }
+}
+
+---
+Сравнение в финале и ответ на вопрос, а что же такое компаратор и компарабл, и когда мы что используем
+
+В каких случаях надо использовать Comparable?
+
+Реализованный в Comparable метод сравнения называют «natural ordering» — естественной сортировкой. 
+в методе compareTo() описываем наиболее распространенный способ сравнения, который будет использоваться для объектов этого класса.
+
+Natural Ordering уже присутствует в Java. 
+Например, строки сортируют по алфавиту, а числа — по возрастанию их значения. 
+Поэтому если вызвать на списке чисел или строк метод sort(), так они и будут отсортированы. Это видели на примерах.
+
+Если Коты будут сравниваться и сортироваться по году рождения, значит, стоит определить для них натуральную сортировку с помощью интерфейса Comparable<Cat> и метода compareTo().
+
+Если нам этого недостаточно. Используем Компаратор
+
+---
+ИТОГ
+Comparable делает наши объекты «сравнимыми» и создает для них наиболее естественный порядок сортировки, который будет использоваться в большинстве случаев.
+
+Comparator — это отдельный класс-«сравниватель» который сравнивает по другим характеристикам, которые мы указываем дополнительно.
+
+

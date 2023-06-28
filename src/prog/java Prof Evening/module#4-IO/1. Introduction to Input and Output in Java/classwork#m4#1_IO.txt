@@ -1,0 +1,246 @@
+---
+Три стандартных потока, которые создаются автоматически
+
+---
+1.
+System.out : это стандартный поток вывода, который используется для создания результата программы на устройстве вывода, таком как экран компьютера.
+
+--
+print() : этот метод в Java используется для отображения текста на консоли. Этот текст передается в качестве параметра этому методу в виде строки.
+Этот метод выводит текст на консоль, а курсор остается в конце текста на консоли. Следующая печать происходит именно отсюда.
+
+public static void main(String[] args){
+        System.out.print("One! ");
+        System.out.print("Two! ");
+        System.out.print("Three!");
+    }
+
+--
+println() : этот метод в Java также используется для вывода текста на консоль. Он печатает текст на консоли, и курсор перемещается в начало следующей строки на консоли. Следующая печать происходит со следующей строки.
+
+public static void main(String[] args) {
+        System.out.println("One!");
+        System.out.println("Two!");
+        System.out.println("Three!");
+    }
+
+--
+printf() : это самый простой из всех методов. System.out.print() и System.out.println() принимают один аргумент, а printf() может принимать несколько аргументов. Это используется для форматирования вывода в Java.
+
+// Example1.java
+public static void main(String[] args){
+        //
+        System.out.printf("one%ntwo%nthree");
+
+        //
+        System.out.printf("%b%n", null);
+        System.out.printf("%B%n", false);
+        System.out.printf("%B%n", 2);
+        System.out.printf("%b%n", "text");
+
+        //
+        System.out.printf("%2.2s", "Hi guys!");
+
+        //
+        System.out.printf("%c%n", 'a');
+        System.out.printf("%C%n", 'a');
+
+        //
+        int x = 100;
+        System.out.printf("Printing simple integer: x = %d\n", x);
+        System.out.printf("Formatted with precision: PI = %.2f\n", Math.PI);
+
+        float y = 3.14f;
+        System.out.printf("Formatted to specific width: n = %.6f\n", y);
+
+        y = 1234567.3f;
+        System.out.printf("Formatted to right margin: n = %50.4f\n", y);
+
+        //
+        Date date = new Date();
+        System.out.printf("%tT%n", date); // Символы H, M, S отвечают за часы, минуты и секунды
+
+        System.out.printf("hours %tH: minutes %tM: seconds %tS%n", date, date, date);
+
+        System.out.printf("%1$tA, %1$tB %1$tY %n", date);
+    }
+
+---
+2.
+System.in : это стандартный поток ввода, который используется для чтения символов с клавиатуры или любого другого стандартного устройства ввода.
+
+--
+Scanner
+
+// Example2.java
+public static void main(String[] args){
+        Scanner scanner = new Scanner(System.in);
+        int n = scanner.nextInt();
+        int k = scanner.nextInt();
+        
+        System.out.println(n+k);
+    }
+
+--
+InputStreamReader — считывает байты и декодирует
+
+Note -> создать файл с любым текстом для примера
+
+// Example3.java (inputStreamExample() method)
+try  {
+            InputStream stream = new FileInputStream("file.txt");
+            Reader reader = new InputStreamReader(stream);
+            int data = reader.read();
+            while (data != -1) {
+                System.out.print((char) data);
+                data = reader.read();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+--
+BufferedReader
+
+// Example3.java (bufferedReaderExample() method)
+      BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int x = 0;
+        try {
+            x = Integer.parseInt(br.readLine());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println(x);
+
+
+---
+3.
+System.err: стандартный поток ошибок
+
+// Example4.java
+public static void main(String[] args){
+
+    //System.out.println("simple message");
+    //System.err.println("error message");
+
+  InputStreamReader inputStreamReader = new InputStreamReader(System.in);
+
+        System.out.println("Enter characters, and '0' to quit.");
+        char c;
+        do {
+            c = (char)inputStreamReader.read();
+            System.err.println(c);
+        } while (c != '0');
+
+}
+
+
+---
+Java IO: Files
+--
+Practice
+
+1.Create a File
+2.Check if File or Directory Exists
+3.Create a Directory if it Does Not Exist
+4.File Length
+5.Rename or Move File or Directory
+6.Delete File or Directory
+7.Check if Path is File or Directory
+8.Read List of Files in Directory
+
+// Example5.java
+public static void main(String[] args) throws IOException {
+
+        File file = new File("\\file.txt");
+        boolean isExists = file.exists();
+        System.out.println("file exists " + isExists);
+
+        file = new File("test\\newdir");
+
+        boolean wasCreated = file.mkdir();
+        System.out.println("created " + wasCreated);
+
+        long length = file.length();
+        System.out.println(length);
+
+        boolean success = file.delete();
+        System.out.println(success);
+
+        File directory = new File("\\data");
+        boolean isDirectory = file.isDirectory();
+        System.out.println(isDirectory);
+
+        directory = new File("\\data");
+        String[] fileNames = file.list();
+        File[] files = file.listFiles();
+    }
+
+Note - > FIS and FOS не углубляемся, просто примеры работы. С этой темой продолжение на след лекции.
+---
+
+// Example6.java (inputExample() method)
+Java FileInputStream
+
+Демонстрируем создание
+
+String path = "<path>\\file.txt";
+FileInputStream fileInputStream = new FileInputStream(path);
+
+Пример чтения
+
+InputStream input = new FileInputStream("<pat>\\text.txt");
+
+int data = input.read();
+while(data != -1) {
+  doSomethingWithData(data);
+  data = input.read();
+}
+input.close();
+
+
+---
+// Example6.java (outputExample() method)
+Java FileOutputStream
+
+String path = "<path>\\datafile.txt";
+FileOutputStream output = new FileOutputStream(path);
+
+Пример
+
+public static void main(String[] args){    
+           try{    
+             FileOutputStream out = new FileOutputStream("<>path\\test.txt");    
+             out.write(65);    
+             out.close();    
+             System.out.println("success...");    
+            }catch(Exception e){System.out.println(e);}    
+      }    
+
+
+---
+самостоятельная
+
+1. Создайте файл, используя FileOutputStream, с текстом: "This is my first experience when I myself work with IO API. I can do everything!"
+
+2. Создайте файл используя new File() в каталоге Desctop, убедитесь, что файл существует, удалите файл.
+
+3. Создайте метод для удаления директории и суб-директорий
+
+
+решение
+public static boolean deleteDir(File dir){
+    File[] files = dir.listFiles();
+    if(files != null){
+        for(File file : files){
+            if(file.isDirectory()){
+                deleteDir(file);
+            } else {
+                file.delete();
+            }
+        }
+    }
+    return dir.delete();
+}

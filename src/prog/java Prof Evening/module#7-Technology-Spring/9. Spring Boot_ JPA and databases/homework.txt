@@ -1,0 +1,30 @@
+Проект про библиотеку:
+
+Первый класс:
+BookEntity{
+Integer id;
+String nameBook;
+Integer yearCreat;
+Integer autorId;
+}
+
+Второй класс:
+AutorEntity{
+Integer id;
+String firstNameAutor;
+String lastNameAutor;
+}
+Наполните базу значениями и реализуйте:  services ,entity, repositories
+Создайте стандартные и межтабличные запросы (Кто написал какую книгу? Какая книга написана раньше всех? Какие книги были написаны с 1800 по 1900? Кто из авторов написал больше всего книг?);
+Примеры для заполнения базы проекта "Библиотека"
+Таблица книг
+BookEntity(id=1, nameBook=Горе от ума, yearCreat=1824, authorId=1)
+BookEntity(id=2, nameBook=Война и мир, yearCreat=1863, authorId=2)
+BookEntity(id=3, nameBook=Мцыри, yearCreat=1838, authorId=3)
+BookEntity(id=4, nameBook=Евгений Онегин, yearCreat=1833, authorId=4)
+
+Таблица авторов
+AuthorEntity(id=1, firstNameAuthor=Александр, lastNameAuthor=Грибоедов)
+AuthorEntity(id=2, firstNameAuthor=Лев, lastNameAuthor=Толстой)
+AuthorEntity(id=3, firstNameAuthor=Михаил, lastNameAuthor=Лермонтов)
+AuthorEntity(id=4, firstNameAuthor=Александр, lastNameAuthor=Пушкин)

@@ -1,0 +1,15 @@
+1.Класс module_1.lecture_1.module_1.lecture_1.Person
+Создать класс module_1.lecture_1.module_1.lecture_1.Person, который содержит:
+
+переменные fullName, age;
+методы move() и talk(), в которых просто вывести на консоль сообщение -"Такой-то  module_1.lecture_1.module_1.lecture_1.Person говорит".
+Добавьте два конструктора  - module_1.lecture_1.module_1.lecture_1.Person() и module_1.lecture_1.module_1.lecture_1.Person(fullName, age).
+Создайте два объекта этого класса. Один объект инициализируется конструктором module_1.lecture_1.module_1.lecture_1.Person(), другой - module_1.lecture_1.module_1.lecture_1.Person(fullName, age)
+
+2.Класс Phone.
+Создайте класс Phone, который содержит переменные number, model и weight.
+Создайте три экземпляра этого класса. 
+Выведите на консоль значения их переменных. 
+Добавить в класс Phone методы: receiveCall, имеет один параметр – имя звонящего. 
+Выводит на консоль сообщение “Звонит {name}”. Метод getNumber – возвращает номер телефона. 
+Вызвать эти методы для каждого из объектов.

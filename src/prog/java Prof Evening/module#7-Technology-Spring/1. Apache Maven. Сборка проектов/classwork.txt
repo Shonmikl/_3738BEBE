@@ -1,0 +1,273 @@
+start.spring.io
+
+Билдим проект. Выбираем Maven, Java и в качестве зависимостей Spring Web. и проходимся по основным различиям между Spring Boot проектами и стандартными Java проектами.
+
+После чего переходим к разработке первого Spring Boot REST API.
+Для проверки запросов скачиваем https://www.postman.com/downloads/
+
+Проект мы создаём для примерного представления, что из себя представляет Spring Boot и с чем мы будем работать в этом модуле.
+
+
+Разархивируем проект. Не объясняя MVC и структуру папок создаем всё в одном единственном главном методе.
+
+Класс Coffee:
+
+@SpringBootApplication
+public class CoffeeApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CoffeeApplication.class, args);
+	}
+
+}
+
+class Coffee {
+	private final String id;
+	private String name;
+
+	public Coffee(String id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+
+	public Coffee(String name) {
+		this(UUID.randomUUID().toString(), name);
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+}
+
+Коротко рассказываем про аннотацию @RestController (Подробнее будет рассмотрено в следующих занятиях).
+Создаём новый класс CoffeeController(всё в том же главном методе) и список объектов класса Coffee:
+
+@RestController
+class CoffeeController {
+	private List<Coffee> coffees = new ArrayList<>();
+}
+
+Создаём конструктор класса CoffeeController:
+
+@RestController
+class CoffeeController {
+	private List<Coffee> coffees = new ArrayList<>();
+
+	public CoffeeController() {
+		coffees.addAll(List.of(
+				new Coffee("Café Cereza"),
+				new Coffee("Café Ganador"),
+				new Coffee("Café Lareño"),
+				new Coffee("Café Três Pontas")
+		));
+	}
+}
+
+GET-запрос
+
+Создадим способ прохода по кофе (Iterable<Coffee>)
+
+	@RequestMapping(value="/coffees", method = RequestMethod.GET)
+	Iterable<Coffee> getCoffees() {
+		return coffees;
+	}
+
+Объясняем принцип GET запроса, а также пути "/coffee".
+
+Меняем предыдущий код на упрощенную аннотацию для GET-запросов - @GetMapping:
+
+	@GetMapping
+	Iterable<Coffee> getCoffees() {
+		return coffees;
+	}
+
+POST-запрос
+
+@PostMapping("/coffees")
+	Coffee postCoffee(@RequestBody Coffee coffee) {
+		coffees.add(coffee);
+		return coffee;
+	}
+
+PUT-запрос
+
+@PutMapping("/{id}")
+	Coffee putCoffee(@PathVariable String id, @RequestBody Coffee coffee) {
+		int coffeeIndex = -1;
+
+		for (Coffee c: coffees) {
+			if (c.getId().equals(id)) {
+				coffeeIndex = coffees.indexOf(c);
+				coffees.set(coffeeIndex, coffee);
+			}
+		}
+
+		return (coffeeIndex == -1) ? postCoffee(coffee) : coffee;
+	}
+}
+
+DELETE-запрос
+
+	@DeleteMapping("/{id}")
+	void deleteCoffee(@PathVariable String id) {
+		coffees.removeIf(c -> c.getId().equals(id));
+	}
+}
+
+Запускаем код, проверяем запросы в POSTMAN, видим недочёты.
+
+Улучшаем наш код:
+1.Уменьшаем повторы в коде
+2.Уменьшаем возврат кодов состояния HTTP там, где этого требует спецификация.
+
+То есть выносим часть сопоставления URI, общую для всех методов класса CoffeeController в аннотацию уровня @RequestMapping - "/coffees".
+
+Коды состояния HTTP для метода GET не оговорены и лишь предлагаются для
+методов POST и DELETE, для ответов метода PUT они обязательны. Поэтому модифицируем метод putCoffee.
+
+Итоговый код(Незнакомые аннотации не объясняем, только HTTP-запросы) :
+
+package com.example.Coffee;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@SpringBootApplication
+public class CoffeeApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CoffeeApplication.class, args);
+	}
+
+}
+
+
+@RestController
+@RequestMapping("/coffees")
+class CoffeeController {
+	private List<Coffee> coffees = new ArrayList<>();
+
+	public CoffeeController() {
+		coffees.addAll(List.of(
+				new Coffee("Café Cereza"),
+				new Coffee("Café Ganador"),
+				new Coffee("Café Lareño"),
+				new Coffee("Café Três Pontas")
+		));
+	}
+
+	@GetMapping
+	Iterable<Coffee> getCoffees() {
+		return coffees;
+	}
+
+	@GetMapping("/{id}")
+	Optional<Coffee> getCoffeeById(@PathVariable String id) {
+		for (Coffee c: coffees) {
+			if (c.getId().equals(id)) {
+				return Optional.of(c);
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@PostMapping
+	Coffee postCoffee(@RequestBody Coffee coffee) {
+		coffees.add(coffee);
+		return coffee;
+	}
+
+	@PutMapping("/{id}")
+	ResponseEntity<Coffee> putCoffee(@PathVariable String id,
+									 @RequestBody Coffee coffee) {
+		int coffeeIndex = -1;
+
+		for (Coffee c: coffees) {
+			if (c.getId().equals(id)) {
+				coffeeIndex = coffees.indexOf(c);
+				coffees.set(coffeeIndex, coffee);
+			}
+		}
+
+		return (coffeeIndex == -1) ?
+				new ResponseEntity<>(postCoffee(coffee), HttpStatus.CREATED) :
+				new ResponseEntity<>(coffee, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/{id}")
+	void deleteCoffee(@PathVariable String id) {
+		coffees.removeIf(c -> c.getId().equals(id));
+	}
+}
+
+class Coffee {
+	private final String id;
+	private String name;
+
+	public Coffee(String id, String name) {
+		this.id = id;
+		this.name = name;
+	}
+
+	public Coffee(String name) {
+		this(UUID.randomUUID().toString(), name);
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+}
+Проверяем запросы в Postman:
+
+GET запрос всех кофе:
+localhost:8080/coffees
+
+GET запрос определенного кофе:
+копируем один любой id из прошлого запроса и вставляем:
+localhost:8080/coffees/{id}
+
+POST запрос:
+Выбираем POST запрос, raw и пишем например:
+{
+  "id": "999999",
+  "name": "Kaldi's Coffee"
+}
+
+Проверяем запрос
+
+PUT Запрос:
+Выбираем PUT запрос и пишем:
+localhost:8080/coffees/999999 (любой id, давайте изменим уже созданный с POST запросом)
+raw -> пишем:
+{
+  "id": "999999",
+  "name": "New type of coffee"
+}
+
+DELETE запрос:
+localhost:8080/coffees/{id} (к примеру 999999)

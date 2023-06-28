@@ -1,0 +1,114 @@
+--- 
+причины возникновения, как пример
+
+Недопустимый ввод данных пользователем
+
+Note -> посмотреть пример со Scanner
+
+
+---
+Иерархия исключений
+Все типы исключений и ошибок являются подклассами класса Throwable, 
+который является базовым классом иерархии. 
+
+Exception. Этот класс используется для исключительных условий, которые должны улавливать пользовательские программы. 
+NullPointerException является примером такого исключения. 
+ 
+Error, используется системой выполнения Java (JVM) для указания ошибок, 
+связанных с самой средой выполнения (JRE). 
+StackOverflowError является примером такой ошибки
+
+---
+Checked 
+
+Это исключения, которые проверяются во время компиляции. 
+Если какой-либо код в методе создает Checked exception, то метод должен либо обрабатывать исключение, либо указывать исключение с помощью ключевого слова throws. 
+В проверяемом исключении есть два типа: полностью проверенные и частично проверенные исключения. 
+Полностью проверенное исключение — это проверенное исключение, в котором также проверяются все его дочерние классы, такие как IOException, InterruptedException. 
+Частично проверенное исключение — это проверенное исключение, в котором некоторые из его дочерних классов не проверены, например Exception.
+
+--
+пример
+код ниже не компилируется, так как функция main() использует FileReader() и FileReader() выдает Checked exception FileNotFoundException. 
+методы readLine() и close(), также генерируют Checked exception IOException
+
+public static void main(String[] args){
+ 
+        FileReader file = new FileReader("<path>test.txt");
+ 
+        BufferedReader fileInput = new BufferedReader(file);
+ 
+        for (int counter = 0; counter < 3; counter++){
+            System.out.println(fileInput.readLine());
+ }
+        fileInput.close();
+    }
+
+как исправить 
+добавить в сигнатуру throws IOException
+или try/cath и обработать
+
+
+---
+Unchecked
+public static void main(String[] args){
+        int x = 0;
+        int y = 10;
+        int z = y / x;
+    }
+
+Код компилируется, но при запуске выдает исключение ArithmeticException. 
+Компилятор позволяет компилировать его, поскольку ArithmeticException является Unchecked исключением.
+
+---
+Пользовательские
+
+class MyException extends Exception {
+    public MyException(String str){
+        super(str);
+    }
+}
+ 
+public class TestEx {
+
+    public static void main(String[] args){
+        try {
+            throw new MyException("Custom Exception");
+        }
+        catch (MyException e) {
+            System.out.println("Caught my Exception");
+            System.out.println(e.getMessage());
+        }
+    }
+}
+
+---
+самостоятельная
+
+этот код выдает два исклчения, добавить код в метод, который принимает int n, вызвать метод с параметром 0 и 10
+
+		int x = 10 / n;
+            int y[] = new int[n];
+            y[x] = 10; 
+
+1) поймать оба, вывести на консоль для первого: "Can't divide by 0", для второго: "Index doesn't exist"
+2) оставить только один блок catch и обработать оба исключения в этом блоке.
+
+--
+решение
+void solution(int n){
+        try {
+            int x = 10 / n;
+            int y[] = new int[n];
+            y[x] = 10;
+        }
+        catch (Exception e) {
+            if (e instanceof ArithmeticException){
+                System.out.println("Can't divide by 0");
+}
+            if (e instanceof ArrayIndexOutOfBoundsException){
+                System.out.println("Index doesn't exist");
+}
+        }
+
+

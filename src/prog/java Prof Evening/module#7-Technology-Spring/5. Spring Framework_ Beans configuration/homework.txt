@@ -1,0 +1,16 @@
+1.Создайте класс Order с полями item и price. Добавьте бин в свой файл конфигурации на основе xml. Создайте класс PaymentGateway, в котором Order будет @Autowired.
+public class PaymentGateway {
+ 
+    @Autowired
+    private Order order;
+     
+    @Override
+    public String toString(){
+        return "ordering "+this.order.getItem()+" | price: "+this.order.getPrice();
+    }
+}
+Выполните шаги по конфигурации бинов так, как была показано на уроке.
+Запустите проект.
+
+2.На основе прошлого задания используйте аннотацию @Qualifier и @Required на своё усмотрение.
+

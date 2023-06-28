@@ -1,0 +1,239 @@
+---
+SortedSet
+---
+Посмотрим в коде на базовые операции
+1. Добавление элементов. 
+Чтобы добавить элемент в SortedSet, мы можем использовать метод add().  
+порядок вставки не сохраняется в TreeSet. 
+Внутри для каждого элемента значения сравниваются и сортируются в порядке возрастания. 
+повторяющиеся элементы не допускаются, и все повторяющиеся элементы игнорируются. 
+значения Null не принимаются SortedSet.
+
+---
+// Example1.java
+public static void main(String[] args) 
+    { 
+        SortedSet<String> sortedSet = new TreeSet<>(); 
+  
+        sortedSet.add("A"); 
+        sortedSet.add("B"); 
+        sortedSet.add("C"); 
+        sortedSetts.add("A"); 
+  
+        System.out.println(sortedSet); 
+    } 
+
+2. Доступ к элементам: 
+после добавления элементов, если мы хотим получить доступ к элементам, мы можем использовать встроенные методы:
+contains(), 
+first(), 
+last()
+
+---
+
+// Example1.java
+public static void main(String[] args) 
+    { 
+        SortedSet<String> sortedSet = new TreeSet<>(); 
+  
+        sortedSet.add("A"); 
+        sortedSet.add("B"); 
+        sortedSet.add("C"); 
+        sortedSetts.add("A"); 
+  
+        System.out.println(sortedSet); 
+
+	  String d = "D"; 
+  
+        System.out.println("Contains " + check + " " + sortedSet.contains(d)); 
+  
+        System.out.println("First Value " + sortedSet.first()); 
+  
+        System.out.println("Last Value " + sortedSet.last()); 
+    } 
+
+
+3. Удаление значений. 
+Значения можно удалить из SortedSet с помощью метода remove().
+
+---
+public static void main(String[] args) 
+    { 
+        SortedSet<String> sortedSet = new TreeSet<>(); 
+  
+        sortedSet.add("A"); 
+        sortedSet.add("B"); 
+        sortedSet.add("C"); 
+        sortedSetts.add("A"); 
+  
+        System.out.println(sortedSet); 
+	  sortedSet.remove("B"); 
+  
+        System.out.println("After removing element " + sortedSet); 
+
+    } 
+
+4. Итерация по SortedSet
+
+// Example2.java
+public static void main(String[] args) 
+    { 
+        SortedSet<String> sortedSet = new TreeSet<>(); 
+  
+        sortedSet.add("A"); 
+        sortedSet.add("B"); 
+        sortedSet.add("C"); 
+        sortedSetts.add("A"); 
+  
+	for (String value : sortedSet) {
+            System.out.print(value + " "); 
+	}
+
+    } 
+
+---
+TreeSet and ConcurrentSkipListSet
+
+// Example3.java
+public static void main(String[] args) 
+    { 
+  
+        ConcurrentSkipListSet<String> set = new ConcurrentSkipListSet<>(); 
+
+        set.add("Apple"); 
+        set.add("Lemon"); 
+        set.add("Banana"); 
+        set.add("Apple"); 
+  
+        Iterator<String> itr = set.iterator(); 
+  
+        System.out.print("Fruits Set: "); 
+        while (itr.hasNext()) { 
+            System.out.print(itr.next() + " "); 
+        } 
+    } 
+
+Note -> Не копаем глубоко с этими коллекциями, познакомились и переходим к HashSet
+
+---
+HASHSET
+класс HashSet представляет хеш-таблицу. 
+HashSet наследует свой функционал от класса AbstractSet, и реализует интерфейс Set.
+
+Хеш-таблица представляет структуру данных, в которой все объекты имеют уникальный ключ или хеш-код. 
+Данный ключ позволяет уникально идентифицировать объект в таблице.
+
+---
+Вспомним
+Хэш-код – это целое число, которое является уникальным идентификатором содержимого объекта. 
+У каждого объекта, с разными данными, свое уникальное число, с помощью которого мы можем понять о равенстве или неравенстве.
+В Java, за вычисление этого кода отвечает метод hashCode(), который переопределенный в наследниках Object. 
+Для наших кастомных классов мы также должны переопределить Хэш-код.
+
+---
+Для создания можно воспользоваться одним из следующих конструкторов:
+
+HashSet(): создает пустой список
+
+HashSet(Collection<? extends E> col): создает хеш-таблицу, в которую добавляет все элементы коллекции
+
+HashSet(int capacity): параметр capacity указывает начальную емкость таблицы, которая по умолчанию равна 16
+
+HashSet(int capacity, float koef): параметр koef или коэффициент заполнения, значение которого должно быть в пределах от 0.0 до 1.0, указывает, насколько должна быть заполнена емкость объектами прежде чем произойдет ее расширение. 
+Например, коэффициент 0.75 указывает, что при заполнении емкости на 3/4 произойдет ее расширение. примерно из 16, произойдет на 12
+
+Класс HashSet не добавляет новых методов, реализуя лишь те, что объявлены в родительских классах и применяемых интерфейсах
+
+Значение, которые мы передаем в HashSet, является ключом к объекту HashMap, а в качестве значения в HashMap используется константа. 
+Таким образом, в каждой паре «ключ-значение» все ключи будут иметь одинаковые значения.
+
+Note -> посмотреть реализацию в Java
+
+
+---
+на последок
+Чем отличаются HashSet, LinkedHashSet и TreeSet
+HashSet хранит элементы в произвольном порядке, но зато быстро ищет. Подходит, если порядок Вам не важен, но важна скорость. Более того, для оптимизации поиска, HashSet будет хранить элементы так, как ему удобно.
+
+LinkedHashSet будет хранить элементы в порядке добавления, но зато работает медленнее.
+
+TreeSet хранит элементы отсортированными.
+
+
+---
+HashSet хранит не только уникальные объекты, но и уникальную коллекцию объектов
+
+// Example4.java
+public static void main(String[] args) 
+    { 
+        HashSet<ArrayList> set = new HashSet<>(); 
+  
+        ArrayList<Integer> list1 = new ArrayList<>(); 
+
+        ArrayList<Integer> list2 = new ArrayList<>(); 
+  
+        list1.add(1); 
+        list1.add(2); 
+        list2.add(1); 
+        list2.add(2); 
+
+        set.add(list1); 
+        set.add(list2); 
+   
+        System.out.println(set.size()); 
+    } 
+
+---
+Для чего нужен?
+
+Класс HashSet предоставляет высокопроизводительные операции над множеством. 
+но не стоит забывать об их избыточности. Hash-set-ы резервируют значительно больше памяти, чем нужно для хранения их элементов, поэтому если есть ограничения их имеет смысл использовать только для множеств среднего размера (1000-10000 элементов). 
+Вы тратите память, чтобы получить более быстрые вычисления. 
+Для больших множеств следует присмотреться к деревьям.
+
+
+---
+Array to Set
+
+// Example5 (method naive())
+Способ 1: Наивный метод
+    public static Set<Integer> convertArrayToSet1(Integer array[]) {
+        Set<Integer> set = new HashSet<>();
+        
+        for (Integer t : array) {
+            set.add(t);
+        }
+
+        return set;
+    }
+
+// Example5 (method arraysAsList())
+Способ 2: Использование метода Arrays.asList()
+    public static Set<Integer> convertArrayToSet2(Integer array[]) {
+        Set<Integer> set = new HashSet<>(Arrays.asList(array));
+
+        return set;
+    }
+
+// Example5 (method collectionsAddAll())
+Способ 3: Использование Collections.addAll()
+ public static Set<String> convertArrayToSet3(Integer array[]) {
+        Set<String> set = new HashSet<>();
+
+        Collections.addAll(set, array);
+
+        return set;
+    }
+
+// Example5 (method javaStream())
+Способ 4: использование Java 8 Stream API - как пример, но без обьяснения - это будет в следующем модуле
+ public static Set<Integer> convertArrayToSet4(Integer array[]) {
+        return Arrays.stream(array).collect(Collectors.toSet());
+    }
+
+// Example5 (method setOf())
+Способ 5: Использование метода Set.of()
+ public static Set<Integer> convertArrayToSet5(Integer array[]) {
+        return new HashSet<>(Set.of(array));
+    }
+

@@ -1,0 +1,69 @@
+При определении <bean> у вас есть возможность объявить область действия для этого bean-компонента.
+ Например, чтобы заставить Spring создавать новый экземпляр компонента каждый раз, когда он необходим, 
+вы должны объявить атрибут области действия компонента как prototype . 
+Точно так же, если вы хотите, чтобы Spring возвращал один и тот же экземпляр компонента каждый раз, когда он необходим, 
+вы должны объявить атрибут области действия компонента как singleton .
+
+singleton scope
+
+1	Создайте проект с именем SpringExample и создайте пакет com.telran.example в папке src созданного проекта.
+2	Добавьте необходимые библиотеки Spring с помощью параметра « Добавить внешние JAR ».
+3	Создайте классы Java HelloWorld и MainApp в пакете com.telran.example .
+4	Создайте файл конфигурации Beans Beans.xml в папке src .
+5	Последним шагом является создание содержимого всех файлов Java и файла конфигурации компонента и запуск приложения.
+
+HelloWorld.java
+
+package com.telran.example;
+
+public class HelloWorld {
+   private String message;
+
+   public void setMessage(String message){
+      this.message  = message;
+   }
+   public void getMessage(){
+      System.out.println("Your Message : " + message);
+   }
+}
+
+MainApp.java
+
+package com.telran.example;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+public class MainApp {
+   public static void main(String[] args) {
+      ApplicationContext context = new ClassPathXmlApplicationContext("Beans.xml");
+      HelloWorld objA = (HelloWorld) context.getBean("helloWorld");
+
+      objA.setMessage("I'm object A");
+      objA.getMessage();
+
+      HelloWorld objB = (HelloWorld) context.getBean("helloWorld");
+      objB.getMessage();
+   }
+}
+
+Beans.xml
+
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+   <bean id = "helloWorld" class = "com.telran.example.HelloWorld" scope = "singleton">
+   </bean>
+
+</beans>
+
+Результаты:
+
+Your Message : I'm object A
+Your Message : I'm object A
+
+Выполните то же самое с атрибутом области действия компонента prototype.

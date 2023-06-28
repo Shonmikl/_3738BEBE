@@ -1,0 +1,271 @@
+Массивы
+
+Массив может содержать примитивы (int, char и т.д.) и объектные (или не примитивные) ссылки класса в зависимости от определения массива.
+В случае примитивных типов данных фактические значения хранятся в смежных ячейках памяти. 
+В случае объектов класса фактические объекты хранятся в куче. 
+
+---
+Создание, инициализация и доступ к массиву
+
+Type объявляет тип элемента массива. 
+Тип элемента определяет тип данных каждого элемента, входящего в массив. 
+Мы также можем создать массив других примитивных типов данных, таких как char, float, double и т. д., или пользовательских типов данных (объектов класса). 
+Таким образом, тип элемента массива определяет, какой тип данных будет храниться в массиве. 
+
+
+В ситуации, когда размер массива и переменные массива уже известны, можно использовать литералы массива. 
+
+int[] intArray = new int[]{1,2,3,4,5,6,7,8,9,10}; // Объявление литерала массива
+
+Длина этого массива определяет длину создаваемого массива.
+В последних версиях Java нет необходимости писать new int[].
+
+---
+пример в коде
+int[] intArray = {1,2,3,4,5,6,7,8,9,10};
+
+---
+доступ
+
+Доступ к каждому элементу массива осуществляется через его индекс. 
+Индекс начинается с 0! и заканчивается на (общий размер массива)-1. 
+Доступ ко всем элементам массива можно получить с помощью цикла.
+
+// доступ к элементам указанного массива 
+for (int i = 0; i < intArray.length; i++) {
+  System.out.println("Элемент по индексу" + i + " = " + intArray[i]);
+}
+
+
+---
+МНОГОМЕРНЫЕ МАССИВЫ
+
+пример
+
+// Example1.java (method one)
+public static void main(String args[])
+    {
+        // declaring and initializing 2D array
+        int arr[][] = { { 5, 7, 19 }, { 13, 4, 1 }, { 17, 44, 22 } };
+  
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++)
+                System.out.print(arr[i][j] + " ");
+  
+            System.out.println();
+        }
+    }
+
+Если n=m (число строк равно числу столбцов) матрица является - квадратной.
+В матрицах можно хранить любые табличные данные: содержание игрового поля (шашки, шахматы, Lines и т.д.), лабиринты
+
+вопрос??? 
+если добавим int arr[][] = { { 5, 7, 19 }, { 13, 4, 1 }, { 17, 44, 22, 33} };
+
+// Example2.java
+метод распечатает 33?
+как сделать, чтобы распечаталось?
+
+---
+практика
+доступ к элементу 2D
+public static void main(String[] args)
+    {
+ 
+        int[][] arr = { { 1, 2 }, { 3, 4 } };
+ 
+        System.out.println("arr[0][0] = " + arr[0][0]);
+    }
+note -> написовать двумерный массив в виде таблицы (см. картинку)
+
+Двумерный массив можно рассматривать как таблицу со строками «x» и столбцами «y», 
+где номер строки находится в диапазоне от 0 до (x-1), а номер столбца — в диапазоне от 0 до (y-1).
+
+
+Трехмерный массив - массив двумерных массивов.
+note -> написовать трехмерный массив (см. картинку)
+
+доступ к элементу 3D
+public static void main(String[] args)
+    {
+ 
+        int[][][] arr = new int[2][2][2];
+        arr[0][0][0] = 1;
+ 
+        System.out.println("arr[0][0][0] = " + arr[0][0][0]);
+    }
+
+---
+обьявление и печать
+
+Элементы в трехмерных массивах обычно обозначаются x[i][j][k], где «i» — номер массива, «j» — номер строки, а «k» — номер столбца. 
+
+public static void main(String[] args)
+    {
+ 
+        int[][][] arr = { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+ 
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                for (int k = 0; k < 2; z++)
+                    System.out.println("arr[" + i + "][" + j + "][" + k + "] = " + arr[i][j][k]);
+    }
+
+
+note! -> еще раз о массивах
+двумерный массив - это "массив массивов" - вложенные массивы 
+в одномерных целочисленных массивах элементом является целое число, то в случае двумерного массива - элементом является массив
+в случае трёхмерного массива - элементом является двумерный массив
+
+вопрос! -> написать код в любом месте, что выведется на консоль?
+
+// Example2.java
+int[][] arr = {{1, 2}, {7, 4}, {8, 3, 5, 9}, {1}};
+
+System.out.println(arr[0][1]); // ?
+System.out.println(arr[1][0]); // ?
+
+обьяснение
+первый индекс указывает, какой по счёту массив мы выбираем. 
+второй индекс указывает, какой элемент по счёту мы выбираем в выбранном ранее массиве. 
+в консоль выведется значение 2, а в строке 4 - 7.
+
+
+note! -> еще немного теории и небольшая демонстрация, перед Морским боем
+---
+Объекты класса для массивов
+У каждого массива есть связанный с ним объект Class, общий для всех других массивов с тем же типом компонента.
+
+пример
+
+// Example3.java
+public static void main(String args[])
+    {
+        int[] intArray = new int[3];
+        byte[] byteArray = new byte[3];
+        short[] shortsArray = new short[3];
+        String[] strArray = new String[3];
+  
+        System.out.println(intArray.getClass());
+        System.out.println(intArray.getClass().getSuperclass());
+        System.out.println(byteArray.getClass());
+        System.out.println(shortsArray.getClass());
+        System.out.println(strArray.getClass());
+    }
+
+
+---
+Клонирование массивов
+
+пример одномерный
+
+// Example4.java (method one())
+public static void main(String args[])
+    {
+        int intArray[] = { 1, 2, 3 };
+  
+        int cloneArray[] = intArray.clone();
+
+        System.out.println(intArray == cloneArray);
+  
+        for (int i = 0; i < cloneArray.length; i++) {
+            System.out.print(cloneArray[i] + " ");
+        }
+    }
+
+пример многомерный
+// Example4.java (method two())
+public static void main(String args[])
+    {
+        int intArray[][] = { { 10, 20, 30 }, { 40, 50 } };
+  
+        int cloneArray[][] = intArray.clone();
+ 
+        System.out.println(intArray == cloneArray);
+        System.out.println(intArray[0] == cloneArray[0]);
+        System.out.println(intArray[1] == cloneArray[1]);
+    }
+
+
+note! -> все еще не до морского боя, а повторяете алгоритм бинарного поиска
+код не пишем, просто проговариваем.
+Код на всякий случай, если совсем все плохо, рекурсивная реализация.
+
+// Example5.java
+public int binarySearch(int[] arr, int leftIdx, int rightIdx, int element) {
+        if (rightIdx >= leftIdx) {
+            int mid = leftIdx + (rightIdx - leftIdx) / 2;
+            if (arr[mid] == element) {
+                return mid;
+            }
+            if (arr[mid] > element) {
+                return binarySearch(arr, leftIdx, mid - 1, element);
+            }
+            return binarySearch(arr, mid + 1, rightIdx, element);
+        }
+        return -1;
+    }
+
+note! -> и напоследок
+---
+виды сортировок в Java
+
+-> Использование циклов
+
+// Example6.java (method sortingViaCycle())
+public static void main(String[] args) {
+        int[] arr = {4, 3, 2, 1};
+
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = i + 1; j < arr.length; j++) {
+                if (arr[j] < arr[i]) {
+                    int temp = arr[i];
+                    arr[i] = arr[j];
+                    arr[j] = temp;
+                }
+            }
+            System.out.print(arr[i] + " ");
+        }
+    }
+
+-> sort() from Arrays
+Arrays.Sort() работает с массивами, которые могут иметь примитивный тип данных
+по умолчанию сортируются в порядке возрастания
+
+// Example6.java (method sortingViaArraysSort())
+public static void main(String[] args)
+    {
+        int[] arr = {4, 3, 2, 1};
+        Arrays.sort(arr);
+        System.out.printf(Arrays.toString(arr));
+    }
+
+-> sort() from Collections
+
+// Example6.java (method sortingViaCollections())
+Collections.sort() работает с объектами, такими как ArrayList и LinkedList.
+
+   public static void main(String[] args)
+    {
+        ArrayList<String> list = new ArrayList<>();
+        list.add("B");
+        list.add("A");
+        list.add("D");
+        list.add("I");
+        list.add("S");
+
+        Collections.sort(list);
+        System.out.println(list);
+    }
+
+Note -> Какой алгоритм сортировки использует Java в sort()?
+Ранее sort() в Java использовал быструю сортировку для массивов примитивов и сортировку слиянием для массивов объектов. 
+В последних версиях Java метод Arrays.sort() и Collection.sort() используют Timsort.
+TimSort алгоритм сспользует InsertionSort и MergeSort.
+1. отсортировать небольшие фрагменты с помощью сортировки вставками 
+2. объедините фрагменты, используя сортировку слиянием
+
+
+---
+практика морской бой
+см. доп файл

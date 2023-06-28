@@ -1,0 +1,374 @@
+Жизненный цикл бинов, методы init() и destroy()
+
+Создадим простой класс: 
+
+public class HelloWorld {
+    public void init() throws Exception
+    {
+        System.out.println("Я инит-метод " + this.getClass().getSimpleName());
+    }
+
+    public void destroy() throws Exception
+    {
+        System.out.println("Я дестрой-метод " + this.getClass().getSimpleName());
+    }
+}
+
+Чтобы использовать пользовательские методы init() и destroy() нам необходимо зарегистрировать их в Spring XML конфигурационном файле при описании бина:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="helloWorld" class="HelloWorld" init-method="init" destroy-method="destroy"/>
+
+</beans>
+
+Также потребуется Main-класс, который и запустит наш контекст:
+
+public class Main {
+    public static void main(String[] args) {
+        ConfigurableApplicationContext context
+        					= new ClassPathXmlApplicationContext("spring.xml");
+        context.close();
+        }
+}
+
+Для того чтобы это реализовать необходимо в классе бина HelloWorldByJavaCode имплементировать два интерфейса,
+ InitializingBean и DisposableBean, а затем переопределить методы afterPropertiesSet() и destroy().
+
+Метод afterPropertiesSet() вызывается при запуске спринг-конейтнера и инстанцировании бина, а метод destroy() сразу после того как контейнер завершит свою работу.
+
+Чтобы вызвать метод destroy() нам необходимо явно закрыть спринг-контекст, вызвав метод close() у объекта ConfigurableApplicationContext.
+
+public class HelloWorldByJavaCode implements InitializingBean,
+        DisposableBean {
+    @Override
+    public void destroy() throws Exception {
+        System.out.println("Я дестрой-метод " + this.getClass().getSimpleName());
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("Я инит-метод " + this.getClass().getSimpleName());
+    }
+}
+
+<bean id="helloWorldByJavaCode" class="HelloWorldNew"/>
+
+Конфигурирование с помощью аннотаций.
+
+Создадим простой проект для наглядности
+
+Message.java:
+
+public class Message {
+    private String message;
+
+    /**
+     * Getter and Setter methods
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * toString method
+     */
+    @Override
+    public String toString() {
+        return "Message: " + this.message;
+    }
+}
+
+MessageConfig.java:
+
+@Configuration
+public class MessageConfig {
+    @Bean
+    public Message printMessage(){
+        return new Message();
+    }
+}
+
+MessageMain.java
+
+public class MessageMain {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext(MessageConfig.class);
+
+        Message message = context.getBean(Message.class);
+
+        message.setMessage("This is simple message.");
+        System.out.println(message);
+    }
+}
+
+После примера практика для студентов.
+Условие задачи: 
+Создайте класс AnswerCheck с пустым конструктором, который будет выводить какое-нибудь сообщение(пример: Answer
+Check Constructor init), а также создайте метод checkAnswer(). Создайте класс Exam.java с конструктором, параметром которого является класс AnswerCheck и 
+методом examCheck(), который вызывает метод answerCheck().
+
+Создайте бины из двух вышеупомянутых классов и аннотируйте всё с помощью @Configuration в файле ExamConfig. Запустите результаты.
+Результат:
+AnswerCheck.java
+
+public class AnswerChecker {
+    public AnswerChecker() {
+        System.out.println("AnswerChecker constructor initiated.");
+    }
+
+    public void checkAnswer() {
+        //Here should be some business logic...
+        System.out.println("Now we are checking answer.");
+    }
+}
+
+Exam.java:
+
+public class Exam {
+    private AnswerChecker answerChecker;
+
+    public Exam(AnswerChecker answerChecker) {
+        System.out.println("Exam constructor.");
+        this.answerChecker = answerChecker;
+    }
+
+    public AnswerChecker getAnswerChecker() {
+        return answerChecker;
+    }
+
+    public void examCheck() {
+        answerChecker.checkAnswer();
+    }
+}
+
+ExamConfig.java:
+
+@Configuration
+public class ExamConfig {
+    @Bean
+    public Exam exam(){
+        return new Exam(answerChecker());
+    }
+
+    @Bean
+    public AnswerChecker answerChecker(){
+        return new AnswerChecker();
+    }
+}
+
+Main.java:
+
+public class Main {
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(ExamConfig.class);
+
+        Exam exam = (Exam) context.getBean(Exam.class);
+        exam.examCheck();
+    }
+}
+
+
+
+
+Аннотации @Required, @Autowired
+
+Создайте класс Developer с полями name, experience и specialty (с конструктором, геттерами и сеттарами)
+
+Аннотируйте конструктор с @Autowired, а также назначьте @Required для всех сеттеров
+
+Код Developer.java:
+
+public class Developer {
+    private String name;
+    private Integer experience;
+    private String specialty;
+
+    /**
+     * Constructor
+     */
+    @Autowired
+    public Developer(String name, Integer experience, String specialty) {
+        this.name = name;
+        this.experience = experience;
+        this.specialty = specialty;
+    }
+
+    /**
+     * Getters and Setters
+     */
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
+    public String getSpecialty() {
+        return specialty;
+    }
+
+    public void setSpecialty(String specialty) {
+        this.specialty = specialty;
+    }
+
+    @Override
+    public String toString() {
+        return "Developer Info:" +
+                "\nName: " + name + ";\n" +
+                "Experience: " + experience + " years;\n" +
+                "Specialty: " + specialty + ".\n";
+    }
+}
+
+Main-класс:
+
+public class Main {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("annotations-autowired-config.xml");
+
+        Developer developer = (Developer) context.getBean("developer");
+
+        System.out.println(developer);
+    }
+} 
+
+annotations-autowired-config.xml:
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:annotation-config/>
+
+    <!-- Definition for developer bean -->
+    <bean id="developer" class="net.proselyte.annotations.Developer">
+        <constructor-arg name="name" value="Proselyte"/>
+        <constructor-arg name="experience" value="3"/>
+        <constructor-arg name="specialty" value="Java developer"/>
+    </bean>
+
+</beans>
+
+Задание: 
+
+Добавьте аннотации @Autowired и @Required к предыдущему заданию Exam.
+
+@Qualifier
+
+Для примера используем класс Developer.java, который уже рассматривали. Добавляем еще один класс.
+Position.java:
+public class Position {
+    @Autowired
+    @Qualifier("javaDeveloper")
+    private Developer developer;
+
+    public Position() {
+    }
+
+    public void getDevelopersInfo(){
+        System.out.println(this.developer);
+    }
+}
+
+немного меняем Main.java:
+
+public class Main {
+    public static void main(String[] args) {
+        ApplicationContext context =
+                new ClassPathXmlApplicationContext("annotations-autowired-config.xml");
+
+        Developer developer = (Developer) context.getBean("developer");
+
+        System.out.println(developer);
+    }
+} 
+
+создаем annotations-autowired-config.xml и пишем код:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd" xmlns:context="http://www.springframework.org/schema/context" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans">
+<context:annotation-config/>
+<bean class="net.proselyte.annotations.Position" id="position"> </bean>
+
+<!-- Definition for dotNetDeveloper bean -->
+
+<bean class="net.proselyte.annotations.Developer" id="dotNetDeveloper">
+<constructor-arg value="Developer" name="name"/>
+<constructor-arg value="2" name="experience"/>
+<constructor-arg value=".Net developer" name="specialty"/>
+</bean>
+
+<!-- Definition for javaDeveloper bean -->
+
+<bean class="net.proselyte.annotations.Developer" id="javaDeveloper">
+<constructor-arg value="Proselyte" name="name"/>
+<constructor-arg value="3" name="experience"/>
+<constructor-arg value="Java developer" name="specialty"/>
+</bean>
+</beans>
+
+
+Мы уже говорили о программном методе инициализации и уничтожения бина, что касается метода с помощью аннотаций, то 
+чтобы вызывать методы init() и destroy() нам необходимо указать над методами соответствующие аннотации - @PostConstruct и @PreDestroy.
+
+Чтобы вызвать метод destroy() нам необходимо явно закрыть спринг-контекст, вызвав метод close() у объекта ConfigurableApplicationContext. Main-класс остается прежним.
+
+public class HelloWorldByAnnotations {
+
+    @PostConstruct
+    public void init() throws Exception
+    {
+        System.out.println("Я инит-метод " + this.getClass().getSimpleName());
+    }
+
+    @PreDestroy
+    public void destroy() throws Exception
+    {
+        System.out.println("Я дестрой-метод " + this.getClass().getSimpleName());
+    }
+}
+
+В XML-файле появится дополнительная строчка, отвечающая за бин, читающий аннотации:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="helloWorldByAnnotations" class="HelloWorldByAnnotations"/>
+    <bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+
+</beans>
+
+
+
+
+
+

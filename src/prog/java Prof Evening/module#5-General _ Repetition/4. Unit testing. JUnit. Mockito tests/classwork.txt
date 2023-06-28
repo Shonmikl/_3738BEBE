@@ -1,0 +1,348 @@
+Для начала нам необходимо создать проект(здесь объясняется подход с Maven, но также можно подключить скачав библиотеки и добавив вручную)
+Maven-проект и добавить нужные библиотеки в pom xml.
+Mockito и junit:
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>2.0.2-beta</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+Создадим простой калькулятор и протестируем наши методы на правильность результатов.
+
+Сам калькулятор:
+
+public class Calculator {
+    public static int add(int a, int b){
+        return a+b;
+    }
+
+    public static int sub(int a, int b){
+        return a-b;
+    }
+}
+
+Тесты должны находиться в папке test
+
+Тест:
+
+public class CalculatorTest {
+    int x;
+    int y;
+
+    @Before
+    public void setUp(){
+        x = 3;
+        y = 7;
+    }
+
+    @Test
+    public void testAdd(){
+        int result = 10;
+        Assert.assertEquals("3 + 7 равно 10", result, Calculator.add(x,y));
+    }
+
+    @Test
+    public void testSub(){
+        int result = -4;
+        Assert.assertEquals(result, Calculator.sub(x,y));
+    }
+}
+
+Аннотация @Before указываетна то, что метод будет выполняться перед каждым тестируемым методом.
+Проверяемый метод assertEquals в нашем случае может принимать сообщение, которое будет показываться при несоответствии фактического и ожидаемого результата, затем второй параметр – фактический результат и третий ожидаемый результат.
+
+Попробуйте изменить знак в методе add с плюса + на умножить *, таким образом наш тест будет провален.
+
+Задание:
+
+Добавьте два метода:
+1.для поиска максимального числа в массиве
+2.для поиска минимального числа в массиве
+и протестируйте эти два метода. 
+Ответ:
+public static int findMax(int arr[]){  
+        int max=0;  
+        for(int i=1;i<arr.length;i++){  
+            if(max<arr[i])  
+                max=arr[i];  
+        }  
+        return max;  
+    }  
+
+public static int findMin(int arr[]) {  
+    int min = arr[0];  
+    for (int i = 1; i < arr.length; i++) {  
+        if (min > arr[i]) {  
+            min = arr[i];  
+        }  
+    }  
+    return min;  
+}
+
+тест:
+
+ @Test  
+    public void testFindMax(){  
+        assertEquals(4,Calculator.findMax(new int[]{1,3,4,2}));  
+        assertEquals(-1,Calculator.findMax(new int[]{-12,-1,-3,-4,-2}));  
+    }  
+ @Test
+public void testFindMin() {  
+    assertEquals(1, Calculator.findMin(new int[]{1,3,4,2}));  
+    assertEquals(-12, Calculator.findMin(new int[]{-12,-1,-3,-4,-2}));  
+}
+
+Протестируем еще пару методов и рассмотрим некоторые аннотации:
+
+    //метод возвращает куб числа
+    public static int cube(int n){  
+        return n*n*n;  
+    }  
+    //метод возвращает строку в перевернутом виде 
+    public static String reverseWord(String str){  
+  
+        StringBuilder result=new StringBuilder();  
+        StringTokenizer tokenizer=new StringTokenizer(str," ");  
+  
+        while(tokenizer.hasMoreTokens()){  
+        StringBuilder sb=new StringBuilder();  
+        sb.append(tokenizer.nextToken());  
+        sb.reverse();  
+  
+        result.append(sb);  
+        result.append(" ");  
+        }  
+        return result.toString();  
+    }  
+
+Тесты:
+
+@BeforeClass  
+    public static void setUpBeforeClass() throws Exception {  
+        System.out.println("before class");  
+    }  
+    @Before  
+    public void setUp() throws Exception {  
+        System.out.println("before");  
+    }  
+
+ @Test  
+    public void testCube(){  
+        System.out.println("test case cube");  
+        assertEquals(27,Calculation.cube(3));  
+    }  
+    @Test  
+    public void testReverseWord(){  
+        System.out.println("test case reverse word");  
+        assertEquals("ym eman si nahk",Calculation.reverseWord("my name is khan");  
+    }  
+    @After  
+    public void tearDown() throws Exception {  
+        System.out.println("after");  
+    }  
+  
+    @AfterClass  
+    public static void tearDownAfterClass() throws Exception {  
+        System.out.println("after class");  
+    }  
+
+Рассмотрим еще один пример с более практичной задачей. 
+Создадим небольшой сервис в котором будет информация о студентах, а именно:
+1.Id - должен считаться по порядку добавляения нового пользователя
+2.Имя студента
+3.Возраст студента
+4.Учебная степень(баклавриат/магистратура)
+
+Необходимо реализовать хранение списка студентов, а также:
+
+1.Создавать список всех студентов
+2.Возвращать количество студентов в целом, и посчитать количество по признаку учебной степени студента
+3.Посчитать средний возраст
+4.Посчитать общую сумму по возрасту студентов, также учесть учебную степень
+5.Создавать список студентов по учебной степени(Bachelor/Master)
+
+Создадим класс Student:
+
+private int id;
+private String name;
+private int age;
+private Degree degree;
+
+private static Map<Integer, Student> allStudents;//для хранения всех студентов
+private static countId = 0;//счётчик для добавления id
+
+Прежде чем переходить к конструктору, реализуем equals и hashCode
+
+@Override
+public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Student student = (Student) o;
+    return age == student.age &&
+            Objects.equals(name, student.name) &&
+            degree == student.degree;
+}
+
+@Override
+public int hashCode() {
+
+    return Objects.hash(name, age, degree);
+}
+
+Также создадим метод для проверки листа студентов на соответсвие по id, чтобы при добавлении нового студента мы могли назначит ему новый порядковый id:
+
+private boolean hasStudent(){
+    for (Student student : allStudents.values()){
+        if (student.equals(this) && student.hashCode() == this.hashCode()){
+            return true;
+        }
+    }
+    return false;
+}
+
+И наш конструктор:
+public Student(String name, int age, Degree degree) {
+
+    this.name = name;
+    this.age = age;
+    this.sex = sex;
+
+    if (!hasStudent()){
+        countId++;
+        this.id = countId;
+        allStudents.put(id, this);
+    }
+}
+
+В конце переопределим toString() - самостоятельно
+
+Теперь перейдем к методам:
+
+public static List<Student> getAllStudents(){
+    return new ArrayList<>(allStudents.values());
+}
+
+//Перегружаем метод
+
+public static List<Student> getAllStudents(Degree degree){
+    List<Student> listAllStudents = new ArrayList<>();
+    for (Student student : allStudents.values()){
+        if (student.degree == degree){
+            listAllStudents.add(student);
+        }
+    }
+    return listAllStudents;
+}
+
+public static int getCountStudents(){
+    return allStudents.size();
+}
+//Перегружаем метод
+public static int getCountStudents(Degree degree){
+    return getAllStudents(degree).size();
+}
+
+Самостоятельно создайте еще 4 метода:
+
+1.Посчитать общую сумму студентов по возрасту
+2.По возрасту и с учетом признака учебной степени
+3.Посчитать средний возраст, как общий
+4.Так и по признаку пола
+
+Решение:
+
+public static int getAllAgeStudents(){
+    int countAge = 0;
+    for (Student student : allStudents.values()){
+        countAge += student.age;
+    }
+    return countAge;
+}
+
+public static int getAllAgeStudents(Degree degree){
+    int countAge = 0;
+    for (Student student : getAllStudents(degree)){
+        countAge += student.age;
+    }
+    return countAge;
+}
+public static int getAverageAgeOfAllStudents(){
+    return getAllAgeStudents() / getCountStudents();
+}
+
+public static int getAverageAgeOfAllStudents(Degree degree){
+    return getAllAgeStudents(degree) / getCountStudents(degree);
+}
+
+в главном классе Main.java создайте 3 студентов и выполните все описанные выше методы
+
+Перейдем к тестам
+
+StudentTest.java:
+
+@Test
+public void getAllUsers() {
+    //создаем тестовые данные
+    Student student1 = new Student("John", 23, Degree.BACHELOR);
+    Student student2 = new Student("Alisa", 29, Degree.MASTER);
+    Student student3 = new Student("Kira", 19, Degree.BACHELOR);
+
+ 
+    List<Student> expected = Student.getAllStudents();
+
+    List<Student> actual = new ArrayList<>();
+    actual.add(student1);
+    actual.add(student2);
+
+    Assert.assertEquals(expected, actual);
+}
+
+Тест провален. В чем причина? Попробуйте найти и решить проблему самостоятельно.
+
+Следующий тест. Добавим проверку на null:
+
+@Test
+public void getAllStudents_NO_NULL() {
+    List<Student> expected = Student.getAllStudents();
+    Assert.assertNotNull(expected);
+}
+
+Самостоятельная работа: 
+
+Выполните тесты на все методы. Учтите, что методы связанные с Degree должны проверяться отдельно, например,
+для подсчета возраста студентов с бакалаврской степенью наш метод будет выглядить так:
+
+@Test
+    public void getAllAgeStudents_BACHELOR() {
+    Student student1 = new Student("John", 23, Degree.BACHELOR);
+    Student student2 = new Student("Alisa", 29, Degree.MASTER);
+    Student student3 = new Student("Kira", 19, Degree.BACHELOR);
+
+        int expected = Student.getAllAgeStudents(Degree.BACHELOR);
+
+        int actual = 23 + 19; //Берем только BACHELOR студентов
+
+        Assert.assertEquals(expected, actual);
+    }
+
+Подсказка:
+
+Аннотация @Before позволит нам существенно уменьшить количество кода. Так как метод обернутый в эту аннотацию выполняется перед каждым тестом, мы можем вывести создание студентов в один метод:
+
+@Before
+    public void setUp() throws Exception {
+    Student student1 = new Student("John", 23, Degree.BACHELOR);
+    Student student2 = new Student("Alisa", 29, Degree.MASTER);
+    Student student3 = new Student("Kira", 19, Degree.BACHELOR);
+    }

@@ -1,0 +1,227 @@
+
+
+Если есть примеры из своих проектов, можно наглядно показать принципы программирования, хорошие способы написания кода, проблемные места и излишки. Будет идеально. 
+
+Разбираемся с DRY
+
+В приведенном ниже примере у нас есть класс Mechanic, который обслуживает автобусы и автомобили.
+
+ public class Mechanic {
+	public void serviceBus() {
+		System.out.println("Servicing bus now");
+	}
+	public void serviceCar() {
+		System.out.println("Servicing car now");
+	}
+}
+
+Класс Mechanic имеет два метода serviceBus() и serviceCar(), которые будут выполнять соответствующие задачи. 
+Теперь рассмотрим случай, когда мастерская предлагает вам другие услуги, такие как мойка автомобиля после обслуживания. 
+После обновления кода в классе Mechanic.
+
+public class Mechanic {
+	public void serviceBus() {
+		System.out.println("Servicing bus now");
+                //Process washing
+	}
+	public void serviceCar() {
+		System.out.println("Servicing car now");
+                //Process washing
+	}
+}
+
+Как мы видим, код обработки стирки дублируется. Мы можем поместить этот код в отдельный метод и использовать его везде, где это необходимо.
+
+public class Mechanic {
+	public void serviceBus() {
+		System.out.println("Servicing bus now");
+                washVehicle();
+	}
+	public void serviceCar() {
+		System.out.println("Servicing car now");
+                washVehicle();
+	}
+        public void washVehicle() {
+               //Process washing
+	}
+}
+
+Разбираемся с SOLID:
+
+1. Единственная ответственность
+Каждый класс должен иметь только одну единственную цель, а не быть наполненным чрезмерной функциональностью. Рассмотрим следующий пример:
+
+public class PasswordHasher
+{
+    public String hashAndSavePassword(String password)
+    {
+        hashPassword();
+        savePassword();
+    }
+
+    public void hashPassword()
+    {
+        //hashing implementation
+    }
+    public void savePassword()
+    {
+        //save to the db
+    }
+}
+
+Этот класс реализован для хеширования паролей, как следует из названия. Сохранение их в базе данных не должно быть его обязанностью. У каждого класса должна быть одна обязанность.
+
+Не должно быть классов , обладающих широким набором функций и требующих слишком многого. Вместо этого мы должны писать наши классы как можно более модульными. Реализовать в данном случае операцию сохранения можно в другом классе.
+
+2. Принцип «открыто-закрыто»
+
+Классы должны быть открыты для расширения, закрыты для модификации.
+
+Другими словами, вам не нужно переписывать существующий класс для реализации новых функций.
+
+Давайте вернемся к нашему примеру с хэшером паролей. Предположим, мы хотим, чтобы наш класс мог хэшировать с различными вариантами алгоритма.
+
+public String hashPassword(String password, HashingType hashingType)
+{
+    if(HashingType.BASE64.equals(hashingType))
+    {
+        hashedPassword="hashed with Base64";
+    }
+    else if(HashingType.MD5.equals(hashingType))
+    {
+        hashedPassword="hashed with MD5";
+    }
+
+    return hashedPassword;
+}
+
+Если бы мы реализовали всё таким образом, мы бы нарушили правила Solid. Каждый раз, когда реализуется новый алгоритм, нам нужно модифицировать существующий класс, и это делает наш код некрасивым и избыточным.
+
+Благодаря ООП у нас есть абстракция. Мы должны сделать наш начальный класс интерфейсным/абстрактным классом и реализовать алгоритмы в конкретных классах.
+
+public class Base64Hasher implements PasswordHasher
+{
+    @Override
+    public String hashPassword(String password)
+    {
+        return "hashed with 64";
+    }
+}
+
+public interface PasswordHasher
+{
+    String hashPassword(String password);
+}
+
+public class MD5Hasher implements PasswordHasher
+{
+    @Override
+    public String hashPassword(String password)
+    {
+        return "hashed with SHA256";
+    }
+}
+
+
+3. Принцип подстановки Лискова.
+
+Подкласс должен иметь возможность выполнять все функции своего родительского класса и может рассматриваться как его родительский класс.
+
+Чтобы продемонстрировать наш пример, давайте создадим классы модели (данных) для использования наших алгоритмов хеширования.
+
+public abstract class Hashed
+{
+    PasswordHasher passwordHasher;
+    String hash;
+    
+    public void generateHash(String password)
+    {
+        hash = passwordHasher.hashPassword(password);
+    }
+}
+
+public class Base64 extends Hashed
+{
+    public Base64()
+    {
+        this.passwordHasher = new Base64Hasher();
+    }
+}
+
+Чтобы выполнить правило Лискова, каждое другое расширение хеширования должно использовать допустимую реализацию хэш-функции и возвращать хэш.
+
+Например, если мы расширим класс Hashed классом NoHash, который использует реализацию, возвращающую точно такой же пароль без какой-либо кодировки, это нарушит правило, поскольку ожидается, что подкласс Hashed будет иметь хешированное значение пароля.
+
+4. Принцип разделения интерфейса
+
+Интерфейсы не должны заставлять классы реализовывать то, что они не выполнить. Большие интерфейсы следует разделить на маленькие.
+
+Считайте, что мы добавили функцию декодирования в интерфейс.
+
+public interface PasswordHasher
+{
+    String hashPassword(String password);
+    String decodePasswordFromHash(String hash);
+}
+
+Это нарушит этот закон, поскольку один из наших алгоритмов, SHA256, практически не поддается расшифровке (это односторонняя функция). Вместо этого мы можем добавить еще один интерфейс к применимым классам для реализации их алгоритма декодирования.
+
+public interface Decryptable
+{
+    String decodePasswordFromHash(String hash);
+}
+
+
+public class Base64Hasher implements PasswordHasher, Decryptable
+{
+    @Override
+    public String hashPassword(String password)
+    {
+        return "hashed with base64";
+    }
+
+    @Override
+    public String decodePasswordFromHash(String hash)
+    {
+        return "decoded from base64";
+    }
+}
+
+5. Принцип инверсии зависимостей
+
+Компоненты должны зависеть от абстракций, а не от деталей.
+
+У нас есть служба паролей, подобная следующей:
+
+public class PasswordService
+{
+    private Base64Hasher hasher = new Base64Hasher();
+    void hashPassword(String password)
+    {
+        hasher.hashPassword(password);
+    }
+}
+
+
+Мы нарушили принцип, так как сильно связали Base64Hasherи PasswordService.
+
+Давайте разделим их и позволим клиенту внедрить необходимую хеш-службу с помощью конструктора.
+
+
+public class PasswordService
+{
+    private PasswordHasher passwordHasher;
+    
+    public PasswordService(PasswordHasher passwordHasher)
+    {
+        this.passwordHasher = passwordHasher;
+    }
+    
+    void hashPassword(String password)
+    {
+        this.passwordHasher.hashPassword(password);
+    }
+}
+
+Намного лучше. Мы можем легко изменить алгоритм хеширования. Наш сервис не заботится об алгоритме, его выбирает клиент. 
+Мы зависим не от конкретной реализации, а от абстракции.

@@ -1,0 +1,51 @@
+1. создать лист, наполнить его 10М> елементами
+2. внутри тела кладем i- тый элемент в переменную temp
+3. перебрать for-each loop
+4. classic for и вызываем list.size() для каждой итерации
+5. classic for, но list.size() определяем в переменную
+6. classic for, list.size() определяем в переменную, перебираем с конца (i--)
+7. используя Itertor
+8. используя ListIterator
+для всех случаев сделать замер времени
+результат вывести в консоль
+
+
+Решение
+
+public static void main (String[] args) {
+        List<Integer> list = new ArrayList<>();
+        long startTime;
+        long endTime;
+        for (int i = 0; i < 1000000; i++) {
+            list.add(i);s
+        }
+
+        startTime = System.currentTimeMillis();
+        for (int i : list) {
+            int temp = i;
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("for-each loop: " + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < list.size(); i++) {
+            int temp = list.get(i);
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("classic for with list.size(): " + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        int size = list.size();
+        for (int i = 0; i < size; i++) {
+            int temp = list.get(i);
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("classic for with list.size() first: " + (endTime - startTime));
+
+        startTime = System.currentTimeMillis();
+        for(int j = list.size()-1; j >= 0; j--) {
+            int temp = list.get(j);
+        }
+        endTime = System.currentTimeMillis();
+        System.out.println("classic for with reverse: " + (endTime - startTime));
+    }

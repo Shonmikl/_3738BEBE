@@ -1,0 +1,244 @@
+Добавляем зависимость в pom.xml:
+
+<dependency>
+  <groupId>org.aspectj</groupId>
+  <artifactId>aspectjrt</artifactId>
+  <version>1.9.5</version>
+</dependency>
+
+Создадим Main.java и простую функцию printName(String name):
+
+public class Main {
+
+  public static void main(String[] args) {
+  printName("Алекс");
+  printName("Константин");
+  printName("Василий");
+  }
+
+  public static void printName(String name) {
+     System.out.println(name);
+  }
+}
+
+будут выведены наши значения. Теперь добавим аспект. Создадим файл MyAspect:
+
+@Aspect
+public class MyAspect{
+
+  @Pointcut("execution(* Main.printName(String))")
+  public void someMethod() {
+  }
+
+  @Before("someMethod()")
+  public void beforeAdvice() {
+     System.out.print("Привет ");
+  }
+}
+
+@Aspect обозначает, что данный класс является аспектом;
+@Pointcut("execution(* Main.printName(String))") — точка среза, которая срабатывает на все вызовы Main.printName с входящим аргументом типа String;
+@Before("someMethod()") — совет, который применяется до вызова кода описанного в точке среза someMethod().
+
+Запускаем и видим отличия.
+
+Еще пример:
+
+У нас есть некоторый метод который осуществляет некоторые операции для клиентов и вызов этого метода из main:
+
+public class Main {
+
+  public static void main(String[] args) {
+  makeSomeOperation("Василий");
+  }
+
+  public static void makeSomeOperation(String clientName) {
+     System.out.println("Выполнение некоторых операций для клиента - " + clientName);
+  }
+}
+
+С помощью аннотации @Around сделаем что-то типа “псевдотранзакции”:
+
+@Aspect
+public class TransactionAspect{
+
+  @Pointcut("execution(* Main.makeSomeOperation(String))")
+  public void executeOperation() {
+  }
+
+  @Around(value = "executeOperation()")
+  public void beforeAdvice(ProceedingJoinPoint joinPoint) {
+     System.out.println("Открытие транзакции...");
+     try {
+        joinPoint.proceed();
+        System.out.println("Закрытие транзакции....");
+     }
+     catch (Throwable throwable) {
+        System.out.println("Операция не удалась, откат транзакции...");
+     }
+  }
+  }
+
+С помощью метода proceed объекта ProceedingJoinPoint мы вызываем оборачиваемый метод, чтобы определить его место в совете и, соответственно, код в методе, который выше joinPoint.proceed(); — это Before, который ниже — After.
+
+Если мы запустим main, в консоли мы получим:
+
+Открытие транзакции...
+Выполнение некоторых операций для клиента - Василий
+Закрытие транзакции....
+
+Если же мы добавим бросок исключения в наш метод (вдруг выполнение операции дало сбой):
+
+public static void makeSomeOperation(String clientName)throws Exception {
+  System.out.println("Выполнение некоторых операций для клиента - " + clientName);
+  throw new Exception();
+}
+
+Вывод будет такой:
+
+Открытие транзакции...
+Выполнение некоторых операций для клиента - Василий
+Операция не удалась, откат транзакции...
+
+Задание:
+На основе вышеупомянутых примеров - потренируйтесь.
+Мы являемся владельцами продуктового магазина. Для того, чтобы мы могли обслужить клиентов у нас есть определенная сумма в кассе для сдачи.
+Создайте 3 метода:
+1.moneyStart - сколько денег первоначально в кассе
+2.proccessOfBuying - выводится ("Клиент " + name + " заплатил" + " евро";)
+3.moneyAfterBuying - сколько денег в кассе после того, как покупатель купил товары
+
+Пример 3:
+
+Сделаем что-то типо логирования в консоли
+
+Main.java:
+
+public class Main {
+  private String value;
+
+  public static void main(String[] args) throws Exception {
+     Main main = new Main();
+     main.setValue("<некоторое значение>");
+     String valueForCheck = main.getValue();
+     main.checkValue(valueForCheck);
+  }
+
+  public void setValue(String value) {
+     this.value = value;
+  }
+
+  public String getValue() {
+     return this.value;
+  }
+
+  public void checkValue(String value) throws Exception {
+     if (value.length() > 10) {
+        throw new Exception();
+     }
+  }
+}
+
+Создадим аспект для логирования:
+
+@Aspect
+public class LogAspect {
+
+  @Pointcut("execution(* *(..))")
+  public void methodExecuting() {
+  }
+
+  @AfterReturning(value = "methodExecuting()", returning = "returningValue")
+  public void recordSuccessfulExecution(JoinPoint joinPoint, Object returningValue) {
+     if (returningValue != null) {
+        System.out.printf("Успешно выполнен метод - %s, класса- %s, с результатом выполнения - %s\n",
+              joinPoint.getSignature().getName(),
+              joinPoint.getSourceLocation().getWithinType().getName(),
+              returningValue);
+     }
+     else {
+        System.out.printf("Успешно выполнен метод - %s, класса- %s\n",
+              joinPoint.getSignature().getName(),
+              joinPoint.getSourceLocation().getWithinType().getName());
+     }
+  }
+
+  @AfterThrowing(value = "methodExecuting()", throwing = "exception")
+  public void recordFailedExecution(JoinPoint joinPoint, Exception exception) {
+     System.out.printf("Метод - %s, класса- %s, был аварийно завершен с исключением - %s\n",
+           joinPoint.getSignature().getName(),
+           joinPoint.getSourceLocation().getWithinType().getName(),
+           exception);
+  }
+}
+
+@Pointcut("execution(* *(..))") — будет соединяться со всеми вызовами всех методов;
+@AfterReturning(value = "methodExecuting()", returning = "returningValue") — совет, который будет выполнен после успешного выполнения целевого метода. 
+
+У нас тут есть два случая:
+Когда у метода есть возвращаемое значение if (returningValue != null) {
+Когда возвращаемого значения нет else {
+@AfterThrowing(value = "methodExecuting()", throwing = "exception") — совет, который будет срабатывать при ошибке, то есть при падении исключения из метода.
+
+Запускаем.
+
+Мы видим ошибку. Нам необходимо обработать исключения (Выполните самостоятельно для освежения памяти по теме "Исключения")
+
+Поработаем с логированием.
+
+Добавим в проект log4j2.
+
+Простой пример:
+
+HelloController:
+
+@Controller
+public class HelloController {
+
+    private static final Logger logger = LogManager.getLogger(HelloController.class);
+
+    private List<Integer> num = Arrays.asList(1, 2, 3, 4, 5);
+
+    @GetMapping("/")
+    public String main(Model model) {
+
+        // pre-java 8
+        if (logger.isDebugEnabled()) {
+            logger.debug("Hello from Log4j 2 - num : {}", num);
+        }
+
+        // java 8 lambda, no need to check log level
+        logger.debug("Hello from Log4j 2 - num : {}", () -> num);
+
+        model.addAttribute("tasks", num);
+        return "welcome"; //view
+    }
+
+    private int getNum() {
+        return 100;
+    }
+
+}
+
+добавим простую html страницу в рамках примера:
+
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+
+<h1>Spring Boot + log4j2 example</h1>
+<ul>
+    <li th:each="task : ${tasks}" th:text="${task}"></li>
+</ul>
+
+</body>
+</html>
+
+Запускаем приложение http://localhost:8080
+
+Смотрим на логи.
+
+
+
+

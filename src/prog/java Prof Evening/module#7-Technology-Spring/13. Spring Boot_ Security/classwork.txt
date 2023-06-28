@@ -1,0 +1,495 @@
+Реализуем JWT.
+
+Создадим проект:
+Lombok
+Spring Web
+Spring Security
+
+после генерации добавим в pom.xml:
+
+ <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+Сперва создадим API. У нас будет 2 роли для пользователей и два эндпойнта:
+
+/api/hello/user – будет выводить приветственное сообщение для пользователей с ролью "USER"
+/api/hello/admin – будет выводить приветственное сообщение для пользователей с ролью "ADMIN".
+
+@RestController
+@RequestMapping("api")
+@RequiredArgsConstructor
+public class Controller {
+
+    private final AuthService authService;
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("hello/user")
+    public ResponseEntity<String> helloUser() {
+        final JwtAuthentication authInfo = authService.getAuthInfo();
+        return ResponseEntity.ok("Hello user " + authInfo.getPrincipal() + "!");
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("hello/admin")
+    public ResponseEntity<String> helloAdmin() {
+        final JwtAuthentication authInfo = authService.getAuthInfo();
+        return ResponseEntity.ok("Hello admin " + authInfo.getPrincipal() + "!");
+    }
+
+}
+
+Теперь создадим класс пользователя системы User:
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+
+    private String login;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private Set<Role> roles;
+
+}
+
+и enum отвечающий за роль пользователя:
+
+@RequiredArgsConstructor
+public enum Role implements GrantedAuthority {
+
+    ADMIN("ADMIN"),
+    USER("USER");
+
+    private final String vale;
+
+    @Override
+    public String getAuthority() {
+        return vale;
+    }
+
+}
+
+Далее создадим UserService, у него будет только один метод, который возвращает пользователя по логину. Пользователи будут заранее создаваться в конструкторе.
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final List<User> users;
+
+    public UserService() {
+        this.users = List.of(
+                new User("andrei", "1234", "Андрей", "Сергеев", Collections.singleton(Role.USER)),
+                new User("petr", "12345", "Петр", "Иванов", Collections.singleton(Role.ADMIN))
+        );
+    }
+
+    public Optional<User> getByLogin(@NonNull String login) {
+        return users.stream()
+                .filter(user -> login.equals(user.getLogin()))
+                .findFirst();
+    }
+
+}
+
+Создадим класс JwtRequest, который пользователь будет присылать, чтобы получить JWT токен. Он содержит поля: логин пользователя и его пароль.
+
+@Setter
+@Getter
+public class JwtRequest {
+
+    private String login;
+    private String password;
+
+}
+
+Создадим еще один объект JwtResponse, который будет содержать access и refresh токены. Этот объект мы будем возвращать в ответ.
+
+@Getter
+@AllArgsConstructor
+public class JwtResponse {
+
+    private final String type = "Bearer";
+    private String accessToken;
+    private String refreshToken;
+
+}
+
+Теперь создадим компонент JwtProvider. Он будет генерировать и валидировать access и refresh токены.
+
+@Slf4j
+@Component
+public class JwtProvider {
+
+    private final SecretKey jwtAccessSecret;
+    private final SecretKey jwtRefreshSecret;
+
+    public JwtProvider(
+            @Value("${jwt.secret.access}") String jwtAccessSecret,
+            @Value("${jwt.secret.refresh}") String jwtRefreshSecret
+    ) {
+        this.jwtAccessSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtAccessSecret));
+        this.jwtRefreshSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtRefreshSecret));
+    }
+
+    public String generateAccessToken(@NonNull User user) {
+        final LocalDateTime now = LocalDateTime.now();
+        final Instant accessExpirationInstant = now.plusMinutes(5).atZone(ZoneId.systemDefault()).toInstant();
+        final Date accessExpiration = Date.from(accessExpirationInstant);
+        return Jwts.builder()
+                .setSubject(user.getLogin())
+                .setExpiration(accessExpiration)
+                .signWith(jwtAccessSecret)
+                .claim("roles", user.getRoles())
+                .claim("firstName", user.getFirstName())
+                .compact();
+    }
+
+    public String generateRefreshToken(@NonNull User user) {
+        final LocalDateTime now = LocalDateTime.now();
+        final Instant refreshExpirationInstant = now.plusDays(30).atZone(ZoneId.systemDefault()).toInstant();
+        final Date refreshExpiration = Date.from(refreshExpirationInstant);
+        return Jwts.builder()
+                .setSubject(user.getLogin())
+                .setExpiration(refreshExpiration)
+                .signWith(jwtRefreshSecret)
+                .compact();
+    }
+
+    public boolean validateAccessToken(@NonNull String accessToken) {
+        return validateToken(accessToken, jwtAccessSecret);
+    }
+
+    public boolean validateRefreshToken(@NonNull String refreshToken) {
+        return validateToken(refreshToken, jwtRefreshSecret);
+    }
+
+    private boolean validateToken(@NonNull String token, @NonNull Key secret) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(secret)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException expEx) {
+            log.error("Token expired", expEx);
+        } catch (UnsupportedJwtException unsEx) {
+            log.error("Unsupported jwt", unsEx);
+        } catch (MalformedJwtException mjEx) {
+            log.error("Malformed jwt", mjEx);
+        } catch (SignatureException sEx) {
+            log.error("Invalid signature", sEx);
+        } catch (Exception e) {
+            log.error("invalid token", e);
+        }
+        return false;
+    }
+
+    public Claims getAccessClaims(@NonNull String token) {
+        return getClaims(token, jwtAccessSecret);
+    }
+
+    public Claims getRefreshClaims(@NonNull String token) {
+        return getClaims(token, jwtRefreshSecret);
+    }
+
+    private Claims getClaims(@NonNull String token, @NonNull Key secret) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secret)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+}
+
+В конструктор мы передаем два секретных ключа, для подписи и валидации токенов.
+Один будет использоваться для генерации access токена, а второй для генерации refresh токена. Это позволит нам создать отдельные сервисы с бизнес логикой, которые не будут выдавать токены, но зная ключ от access токена смогут их валидировать.
+Но эти сервисы не будут знать ключ от refresh токена, а значит если какой-то из этих сервисов будет скомпрометирован, то мы просто заменим ключ от access токена, и не придется разлогинивать всех пользователей из-за того что их refresh токены станут не валидны.
+С помощью аннотации @Value Spring подставляет значение из файла application.properties. 
+Поэтому нужно записать туда значения ключей в формате Base64:
+
+jwt.secret.access=qBTmv4oXFFR2GwjexDJ4t6fsIUIUhhXqlktXjXdkcyygs8nPVEwMfo29VDRRepYDVV5IkIxBMzr7OEHXEHd37w==
+jwt.secret.refresh=zL1HB3Pch05Avfynovxrf/kpF9O2m4NCWKJUjEp27s9J2jEG3ifiKCGylaZ8fDeoONSTJP/wAzKawB8F9rOMNg==
+
+Создадим AuthService
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserService userService;
+    private final Map<String, String> refreshStorage = new HashMap<>();
+    private final JwtProvider jwtProvider;
+
+    public JwtResponse login(@NonNull JwtRequest authRequest) {
+        final User user = userService.getByLogin(authRequest.getLogin())
+                .orElseThrow(() -> new AuthException("Пользователь не найден"));
+        if (user.getPassword().equals(authRequest.getPassword())) {
+            final String accessToken = jwtProvider.generateAccessToken(user);
+            final String refreshToken = jwtProvider.generateRefreshToken(user);
+            refreshStorage.put(user.getLogin(), refreshToken);
+            return new JwtResponse(accessToken, refreshToken);
+        } else {
+            throw new AuthException("Неправильный пароль");
+        }
+    }
+
+    public JwtResponse getAccessToken(@NonNull String refreshToken) {
+        if (jwtProvider.validateRefreshToken(refreshToken)) {
+            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
+            final String login = claims.getSubject();
+            final String saveRefreshToken = refreshStorage.get(login);
+            if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
+                final User user = userService.getByLogin(login)
+                        .orElseThrow(() -> new AuthException("Пользователь не найден"));
+                final String accessToken = jwtProvider.generateAccessToken(user);
+                return new JwtResponse(accessToken, null);
+            }
+        }
+        return new JwtResponse(null, null);
+    }
+
+    public JwtResponse refresh(@NonNull String refreshToken) {
+        if (jwtProvider.validateRefreshToken(refreshToken)) {
+            final Claims claims = jwtProvider.getRefreshClaims(refreshToken);
+            final String login = claims.getSubject();
+            final String saveRefreshToken = refreshStorage.get(login);
+            if (saveRefreshToken != null && saveRefreshToken.equals(refreshToken)) {
+                final User user = userService.getByLogin(login)
+                        .orElseThrow(() -> new AuthException("Пользователь не найден"));
+                final String accessToken = jwtProvider.generateAccessToken(user);
+                final String newRefreshToken = jwtProvider.generateRefreshToken(user);
+                refreshStorage.put(user.getLogin(), newRefreshToken);
+                return new JwtResponse(accessToken, newRefreshToken);
+            }
+        }
+        throw new AuthException("Невалидный JWT токен");
+    }
+
+    public JwtAuthentication getAuthInfo() {
+        return (JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
+    }
+
+}
+
+Объясняем принцип работы по шагам
+
+Метод generateRefreshToken делает все тоже самое, только мы не передаем туда claims и указываем большее время жизни.
+
+Методы validateAccessToken и validateRefreshToken отвечают за проверку валидности токена.
+Если токен протух, или подписан неправильно, то в лог запишется соотсветсвующее сообщение, а метод вернет false.
+
+Разберем метод login. Сначала мы находим пользователя по логину. 
+Если пользователь найден, и присланный пароль совпадает с паролем пользователя, то передаем объект пользователя в JwtProvider и получаем от него токены. Далее сохраняем выданный рефреш токен в мапу refreshStorage и возвращаем объект JwtResponse с токенами. 
+
+Переходим к методу getAccessToken, который принимает refresh токен, а возвращает новый access токен. 
+Сначала мы проверяем, что присланный rehresh токен валиден. Если валиден, то получаем claims и оттуда получаем логин пользователя. Далее по логину находим выданный пользователю refresh токен в мапе refreshStorage, и сверяем его с присланным пользователем. Если токены одинаковые, то получаем объект User, который отправляем в JwtProvider и получаем новый access токен, без обновления refresh токена.
+
+Теперь создадим контроллер AuthController
+
+@RestController
+@RequestMapping("api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+
+    @PostMapping("login")
+    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest authRequest) {
+        final JwtResponse token = authService.login(authRequest);
+        return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("token")
+    public ResponseEntity<JwtResponse> getNewAccessToken(@RequestBody RefreshJwtRequest request) {
+        final JwtResponse token = authService.getAccessToken(request.getRefreshToken());
+        return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("refresh")
+    public ResponseEntity<JwtResponse> getNewRefreshToken(@RequestBody RefreshJwtRequest request) {
+        final JwtResponse token = authService.refresh(request.getRefreshToken());
+        return ResponseEntity.ok(token);
+    }
+
+}
+
+Эндпойнт /api/auth/login принимает JwtRequest, а возвращает JwtResponse с токенами.
+Эндпойнт /api/auth/token  принимает RefreshJwtRequest c единственным полем refreshToken и возвращает JwtResponse с новым access токеном.
+И наконец эндпойнт /api/auth/refresh  принимает RefreshJwtRequest  и возвращает JwtResponse с новыми токенами.
+
+@Getter
+@Setter
+public class RefreshJwtRequest {
+
+    public String refreshToken;
+
+}
+
+Также для большой безопасности мы защитим /api/auth/refresh и будем принимать на него запросы только с валидным access токеном. Для этого нам нужно создать класс конфигурации для настройки Spting Security.
+
+@Configuration
+@EnableWebSecurity
+@RequiredArgsConstructor
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig {
+
+    private final JwtFilter jwtFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .httpBasic().disable()
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests(
+                        authz -> authz
+                                .antMatchers("/api/auth/login", "/api/auth/token").permitAll()
+                                .anyRequest().authenticated()
+                                .and()
+                                .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                ).build();
+    }
+
+}
+
+Эндпойнт, который выдает токены по логину и паролю, а также тот, что выдает новый access токен по refresh токену, мы оставляем без защиты. Остальные эндпойнты будут доступны только аутентифицированным пользователям:
+.antMatchers("/api/auth/login", "/api/auth/token").permitAll()
+                                .anyRequest().authenticated()
+
+Также мы добавляем наш фильтр JwtFilter, который и будет осуществлять аутентификацию пользователей:
+
+ .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
+Создадим фильтр:
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class JwtFilter extends GenericFilterBean {
+
+    private static final String AUTHORIZATION = "Authorization";
+
+    private final JwtProvider jwtProvider;
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc)
+            throws IOException, ServletException {
+        final String token = getTokenFromRequest((HttpServletRequest) request);
+        if (token != null && jwtProvider.validateAccessToken(token)) {
+            final Claims claims = jwtProvider.getAccessClaims(token);
+            final JwtAuthentication jwtInfoToken = JwtUtils.generate(claims);
+            jwtInfoToken.setAuthenticated(true);
+            SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
+        }
+        fc.doFilter(request, response);
+    }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        final String bearer = request.getHeader(AUTHORIZATION);
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
+    }
+
+}
+
+и JwtAuthentication:
+
+@Getter
+@Setter
+public class JwtAuthentication implements Authentication {
+
+    private boolean authenticated;
+    private String username;
+    private String firstName;
+    private Set<Role> roles;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() { return roles; }
+
+    @Override
+    public Object getCredentials() { return null; }
+
+    @Override
+    public Object getDetails() { return null; }
+
+    @Override
+    public Object getPrincipal() { return username; }
+
+    @Override
+    public boolean isAuthenticated() { return authenticated; }
+
+    @Override
+    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+        this.authenticated = isAuthenticated;
+    }
+
+    @Override
+    public String getName() { return firstName; }
+
+}
+
+Проверяем с помощью Postman(см результаты в папке):
+
+Сначала получаем access и refresh токен по логину и паролю:
+access.jpg
+
+Далее берем access токен и вставляем его на вкладке Authorizatin, выбрав тип "Bearer token":
+bearer_token.jpg
+
+Выполняем запрос и получаем результат:
+result.jpg
+
+Также попробуем получить сообщение, которое предназначено только для админов:
+admin_access.jpg
+
+Мы получим ошибку 403 (ошибка доступа). Всё работает правильно. Если подождать 5 минут, то по тому же эндпоинту /api/hello/user увидим эту же ошибку, так как срок access токена истёк.
+Чтобы получить новый токен отправляем запрос на /api/auth/token. В теле запроса указываем наш refresh токен.
+
+Теперь взамен текущего refresh токена получим новые access и refresh токены. Для этого вызовем /api/auth/refresh и передадим наш текущий refresh токен в теле запроса. Также не стоит забывать, что это защищенный метод, поэтому во вкладке Authorization вставляем наш access токен.
+
+ 
+В качестве практики можно начать реализацию домашнего задания. Если студент выполнил задание до окончания занятия, тогда он может переходить к реализации финального проекта.
+

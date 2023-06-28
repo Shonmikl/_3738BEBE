@@ -1,0 +1,334 @@
+Primitive
+
+Передача по значению (by value)
+Создаются в области Стек.
+
+Reference
+Создаются в области Куча.
+Ссылка создается для доступа к обьекту.
+Когда вы передаете ссылку на объект в метод, вы передаете копию ссылки. 
+Объект никуда не перемещается, обьект остается всегда в куче где был создан.
+Ссылок на обьект может быть сколько угодно.
+
+---
+пример в коде
+
+// Example1.java
+public class User {
+    private String name = "User";
+}
+
+// Example1.java
+public class Test {
+  public static void main(String[] args) {
+    User myUser = new User();
+    test(myUser)
+  }
+
+  public void test(User user) {
+    System.out.println(user.getName());
+  }
+}
+
+Существует только один объект User. Но две ссылки могут получить доступ к одному и тому же объекту User.
+Вы можете изменить объект, на который ссылается testUser, но вы не можете взять и изменить ссылку testUser.
+
+// Example1.java
+public void test2(User user) {
+	user = new User();
+}
+
+user указывает на другой объект.
+
+
+
+Вопрос ???
+--- написать пример и задать вопрос
+расскажите где будут храниться обьекты, переменные, поля.
+
+
+public class Cat {
+    private int age = 12;
+    private String name = "Cat";
+
+    public void myMethod() {
+        int size = 2;
+        Cat cat = new Cat();
+    }
+}
+
+Обьяснение:
+Важно понимать разницу между переменной и полем.
+age - это поле, имеет примитивный тип, но храниться будет там же, где и объект - в куче. Так же и поле ссылочного типа name.
+
+size и cat - это переменные. В первой хранится значение 2, во втором ссылка на объект класса Cat - на стеке.
+
+При завершении метода myMethod стек будет уничтожен и вместе с ним перестанут существовать переменные size и cat. 
+Но сам объект cat останется в куче до следующего вызова сборщика мусора. 
+Сборщик мусора при запуске, не найдёт ссылки на объект cat и удалит его.
+ 
+
+---
+Важно!!!
+ 
+Java передает параметры по значению. Всегда!!!
+ 
+Для примитивных типов — вы передаете копию текущего значения!
+Для ссылок на объекты — вы передаете копию ссылки! Вы никогда не передаете объект. Все объекты хранятся в куче. Всегда. 
+
+
+---
+autoboxing and unboxing
+
+преимущество автоматической упаковки и распаковки
+-> позволяет нам взаимозаменяемо использовать примитивные типы и объекты класса Wrapper, не нужно явно выполнять какое-либо приведение типов
+
+Пример - пишем вместе
+
+// Example2.java
+public class TestBoxing {
+    public static void main(String[] args) {
+        // Integer Object
+        Integer i = new Integer(20);
+ 
+        // Unboxing the Object
+        int unbox = i;
+ 
+        System.out.println("Value of i:" + i);
+        System.out.println("Value of unboxing i: " + unbox);
+ 
+        // autoboxing of character
+        Character a = 'a';
+ 
+        // unboxing of Character
+        char ch = a;
+ 
+        System.out.println("Value of a: " + a);
+        System.out.println("Value of unboxing ch: " + ch);
+    }
+}
+
+---
+опциональный вопрос: еще раз спросить о том где, что храниться.
+
+Пример №2
+
+автоупаковка и распаковка на примере Collections
+
+// Example3.java
+public void textCollectionBoxing() {
+        // Creating an empty Arraylist of integer type
+        ArrayList<Integer> list = new ArrayList<>();
+ 
+        // int primitives type values
+        list.add(10);
+        list.add(20);
+        list.add(30);
+ 
+        System.out.println("ArrayList: " + list);
+    }
+
+Пример №3
+найти сумму нечетных чисел в списке
+Важно!!!
+операторы остатка (%) и унарного плюса (+=) не применяются к объектам Integer.
+Integer в примитивное значение int происходит путем вызова метода intValue().
+
+//  Example4.java
+    public static void main(String[] args) {
+        List<Integer> list = new ArrayList<>();
+
+        for (int i = 0; i < 10; i++) {
+            list.add(i);
+        }
+
+        int sum = sumOfOddNumber(list);
+        System.out.println("Sum of odd numbers = " + sum);
+    }
+
+    public static int sumOfOddNumber(List<Integer> list) {
+        int sum = 0;
+
+        for (Integer i : list) {
+            if (i % 2 != 0) { // Unboxing of i automatically
+                sum += i;
+            }
+            
+            if (i.intValue() % 2 != 0) { // Unboxing of i is done automatically using intValue()
+                sum += i.intValue();
+            }
+        }
+        return sum;
+    }
+
+
+---
+Comparing
+
+// Example5.java
+Cat cat1 = new Cat();
+Cat cat2 = cat1;
+if(cat1==cat2) //comparing reference
+
+String str1 = "JAVA";
+String str2 = "JAVA";
+String str3 = "Java";
+System.out.println(str1.equals(str2));   // returns true because content and case is same    
+System.out.println(str1.equals(str3));   // returns false because case is not same    
+
+
+---
+Copying
+
+Два варианта копирования.
+1. Cоздаем копию ссылки на объект
+---
+Пример - пишем вместе
+
+// Example6.java
+public class Test {
+    public static void main(String[] args) {
+        Book pinokkio = new Book(“Pinokkio", 1950);
+        pinokkio.print();      // Book Pinokkio
+        Book miracle = pinokkio;
+        miracle.setName(“Miracle");
+        pinokkio.print();      // Book mirackle
+    }
+}
+
+Здесь создаем два объекта Book и один присваиваем другому. 
+Мы изменяем только объект miracle, вместе с ним изменяется и объект pinokkio. 
+Они указывают на одну и ту же область в памяти, где собственно данные об объекте pinokkio.
+
+// Example6.java
+public class Book {
+
+    private String name;
+    private int year;
+     
+    public Book(String name, int year){
+        this.name=name;
+        this.year=year;
+    }
+
+    public void print(){
+        System.out.printf("Book title: ", name);
+    }
+}
+
+
+2. Создаем фактическую копию (создание новой копии) объекта. (clone)
+
+Для реализации клонирования класс Book должен имплементить Cloneable
+Реализация этого метода просто возвращает вызов метода clone для родительского класса
+Метод должен выбрасывать исключение CloneNotSupportedException
+
+// Example7.java
+   public static void main(String[] args) {
+        try {
+            Book pinokkio = new Book("Pinokkio", 1950);
+            Book miracle = pinokkio.clone();
+            miracle.setName("Miracle");
+            pinokkio.print();      // Book pinokkio
+        } catch (CloneNotSupportedException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+// Example7.java
+public class Book implements Cloneable{
+    private String name;
+    private int year;
+
+    public Book(String name, int year) {
+        this.name = name;
+        this.year = year;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void print() {
+        System.out.printf("Book title: " + name);
+    }
+
+    protected Book clone() throws CloneNotSupportedException {
+        return (Book) super.clone();
+    }
+
+}
+
+
+данный способ осуществляет неполное копирование и подойдет, если клонируемый объект не содержит сложных объектов !!!
+добавим в пример обьект Автор
+
+// Example8.java
+public class Author {
+ 
+    private String name;
+     
+    public Author(String name){
+     
+        this.name=name;
+    }
+}
+
+// Example8.java
+попробуем изменить автора книги
+
+      try {
+            Book pinokkio = new Book("Pinokkio", 1950, new Author("Collodi"));
+            Book miracle = pinokkio.clone();
+            miracle.getAuthor().setName("Tolstoy");
+            System.out.println(miracle.getAuthor()); -> pinokkio.getAuthor()
+        } catch (CloneNotSupportedException ex) {
+            System.out.println(ex.getMessage());
+        }
+
+переменные pinokkio и miracle будут указывать на разные объекты в памяти, но эти объекты при этом будут указывать на один объект Author.
+нам необходимо выполнить полное копирование, для этого надо определить метод клонирования у класса Author
+
+
+// Example9.java
+class Author implements Cloneable{
+ 
+       private String name;
+     
+    public Author(String name) {
+     
+        this.name=name;
+    }
+     
+    public Author clone() throws CloneNotSupportedException {
+     
+        return (Author) super.clone();
+    }
+}
+
+
+исправить метод clone в классе Book
+
+// Example9.java
+public Book clone() throws CloneNotSupportedException{
+     
+    Book newBook = (Book) super.clone();
+    newBook.author=(Author) author.clone();
+    return newBook;
+}
+
+Важно!!!
+---
+Избегайте clone и ищите собственное решение для копирования :)
+
+-> Конструктор копирования — это специальный конструктор для создания нового объекта как копии существующего объекта
+-> Фабрика копирования - использует статический метод, в котором используется по сути путь Конструктора копирования
+
+---
+
+
+
+
+
+
+

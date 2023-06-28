@@ -1,0 +1,377 @@
+Сначала создаем (maven) проект и подключаем зависимости:
+Java 11
+Spring Data JPA
+H2
+Spring Data Web
+
+в application properties добавляем(и объясняем принцип действия в процессе):
+
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.url=jdbc:h2:mem:test;
+spring.datasource.username=sa
+spring.datasource.password=null
+spring.datasource.h2.console.enabled=true
+spring.jpa.hibernate.ddl-auto=create
+spring.jpa.generate-ddl=true
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+
+Посмотрим на datasource:
+
+driverClassName: указывает, какой тип базы мы будем использовать,  у нас это h2. Если бы мы установили Postgres, то написали бы rg.postgresql.Driver;
+url: — это место, где располагается база, у нас она располагается непосредсвенно в памяти проекта, о чем говорит слово mem (от memory — память), то есть при рестарте приложения база будет создана заново. Можно вместо  jdbc:h2:mem:test; написать jdbc:h2:~/test;, и база будет храниться в папке проекта. Опять же, если бы у нас был установлен Postgres, то написали бы что то вроде jdbc:postgresql://localhost:5432/mydb.
+
+Теперь jpa:
+
+hibernate.ddl-auto: говорит, что делать со схемой базы при перезапуске приложения. Сейчас тут стоит create — значит, создавать заново, также может стоять update — дополнять базу, create-drop — очищать при запуске.
+
+Перед тем как наполнять нашу h2 базу создаем класс утилиту для запуска в ней методов по заполнению базы в пакете utils:
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Service;
+
+@Service //аннотация помечает бин как сервис
+public class InitiateUtils implements CommandLineRunner { //имплементируем интерфейс CommandLineRunner (командная строка запуска)
+
+    @Override
+//переопределяем метод который позволит
+//нам выполнять методы нашего приложения при запуске
+    public void run(String... args) throws Exception {
+        System.out.println("run"); //проверим что это работает
+    }
+}
+
+Создадим сущности в пакете entities.
+Сущность  - это бин, цель которого хранить некоторые данные.
+
+Назовем сущность vegetable:
+
+@Entity//помечаем бин как сущность
+@Table(name = "vegetable_table")//в этой аннотации можно указать имя создаваемой таблицы
+public class Vegetable {
+
+    @Id//аннотация из пакета javax.persistence.*, помечает поле как id
+    @Column(name = "id_vegetable")//в этой аннотации можно указать имя поля
+    @GenericGenerator(name = "generator", strategy = "increment")//незаметно добрались до hibernate,
+// здесь указывается что id будет автоматически увеличиваться при новых записях
+    @GeneratedValue(generator = "generator")//аннотация генерации id
+    private Integer id;
+
+    @Column(name = "vegetable_name")
+    private String vegetableName;
+
+    @Column(name = "provider_code")
+    private Integer providerCode;
+
+   //что бы в с классом можно было совершать манипуляции создается
+  //пустой конструктор, геттеры, сеттеры и переопределяется метод toString() - можно сгенерировать или прописать самостоятельно
+}
+
+создадим репозиторий в пакете repository который будет расширяться JpaRepository:
+
+@Repository//помечаем что этот бин - репозиторий
+public interface VegetableRepository extends JpaRepository<Vegetable,Integer> {
+//репозиторий является интерфейсом, который наследуется от другого интерфейса JpaRepository<>
+//для него необходимо указать с какой сущность он должен работать, у нас это Vegetable
+//и тип данных у поля id данной сущности, у нас это Integer
+}
+
+Поскольку репозиторий это интерфейс, он ни чего не делает, он только объявляет методы,
+необходим еще кто-то что бы эти методы реализовать.
+Для этого придуман "сервис". Создадим его в пакете services. Нам нужно что бы "сервис" как то был связан с "репозиторием" и реализовывал определенный функционал.
+
+@Service
+public class VegetableService {
+
+    private final VegetableRepository vegetableRepository;
+
+public VegetableService(VegetableRepository VegetableRepository) {//внедрили зависимость
+    this.vegetableRepository = vegetableRepository;
+}
+
+//создали публичный метод (название любое может быть)
+//на вход принимает сущность и сохраняет ее в базу
+    public void save(Vegetable vegetable){
+        vegetableRepository.save(vegetable); //реализовали метод внедренного бина
+    }
+
+//возвращает лист всех сущностей из базы
+    public List<Vegetable> getAll(){
+       return vegetableRepository.findAll(); //реализовали метод внедренного бина
+    }
+}
+
+Осталось только реализовать это в нашей утилите
+
+@Service
+public class InitiateUtils implements CommandLineRunner {
+
+    private final VegetableService vegetableService;
+
+public InitiateUtils (VegetableService vegetableService) {//незабываем конструктор для внедрения
+    this.vegetableService = vegetableService;
+}
+
+    @Override
+    public void run(String... args) throws Exception {
+
+//создаем несколько сущностей фруктов, через сеттеры заполняем поля
+        Vegetable vegetable1 = new Vegetable();
+        vegetable1.setFruitName("vegetable1");
+        vegetable1.setProviderCode(1);
+
+         Vegetable vegetable2 = new Vegetable();
+        vegetable2.setFruitName("vegetable2");
+        vegetable2.setProviderCode(2);
+
+        Vegetable vegetable3 = new Vegetable();
+        vegetable3.setFruitName("vegetable3");
+        vegetable3.setProviderCode(3);
+
+//с помощью переменной сервиса вызываем методы сохранения в базу, по разу для одного объекта
+        vegetableService.save(vegetable1);
+        vegetableService.save(vegetable2);
+        vegetableService.save(vegetable3);
+
+//здесь вытаскиваем базу обратно
+        List<Vegetable> all = vegetableService.getAll();
+
+//и выводим что получилось
+        for (Vegetable entity : all) {
+            System.out.println(entity);
+        }
+    }
+}
+
+Практика:
+
+Проект про починку телефонов:
+
+Первый класс:
+PhoneEntity{
+Integer id;
+String modelName;
+String service;
+}
+
+Второй класс:
+ServiceEntity{
+Integer id;
+String service;
+Integer price;
+}
+
+Наполните базу значениями и реализуйте:  services ,entity, repositories
+Создайте стандартные и межтабличные запросы (Сколько стоит поменять батарею на телефоне? Какая услуга самая дорогая? Напишите модели в консоль в алфавитном порядке и т.д.);
+
+
+А теперь поработаем с базой данных и с JPA CRUD(Create, Read, Update, Delete):
+
+Создадим проект и добавим (в зависимости от выбранной базы данных)
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+
+Mysql:
+
+pom.xml: 
+
+<dependency>
+	<groupId>mysql</groupId>
+	<artifactId>mysql-connector-java</artifactId>
+	<scope>runtime</scope>
+</dependency>
+
+application.properties:
+
+spring.datasource.url= jdbc:mysql://localhost:3306/testdb?useSSL=false
+spring.datasource.username= root
+spring.datasource.password= 123456
+
+spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.MySQL5InnoDBDialect
+
+# Hibernate ddl auto (create, create-drop, validate, update)
+spring.jpa.hibernate.ddl-auto= update
+
+PostgreSQL:
+
+pom.xml:
+
+<dependency>
+	<groupId>org.postgresql</groupId>
+	<artifactId>postgresql</artifactId>
+	<scope>runtime</scope>
+</dependency>
+
+application.properties:
+
+spring.datasource.url= jdbc:postgresql://localhost:5432/testdb
+spring.datasource.username= postgres
+spring.datasource.password= 123
+
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation= true
+spring.jpa.properties.hibernate.dialect= org.hibernate.dialect.PostgreSQLDialect
+
+# Hibernate ddl auto (create, create-drop, validate, update)
+spring.jpa.hibernate.ddl-auto= update
+
+создадим папку model и добавим сущность:
+
+import javax.persistence.*;
+
+@Entity
+@Table(name = "tutorials")
+public class Tutorial {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
+
+	@Column(name = "title")
+	private String title;
+
+	@Column(name = "description")
+	private String description;
+
+	@Column(name = "published")
+	private boolean published;
+
+	public Tutorial() {
+
+	}
+
+	public Tutorial(String title, String description, boolean published) {
+		this.title = title;
+		this.description = description;
+		this.published = published;
+	}
+	//геттеры, сеттеры и т д
+
+создадим папку repository и добавим:
+
+public interface TutorialRepository extends JpaRepository<Tutorial, Long> {
+  List<Tutorial> findByPublished(boolean published);
+  List<Tutorial> findByTitleContaining(String title);
+}
+
+Теперь мы можем использовать методы JpaRepository: save(), findOne(), findById(), findAll(), count(), delete(), deleteById()… без реализации этих методов.
+
+Мы также определяем пользовательские методы поиска:
+– findByPublished(): возвращает все Tutorials со publishedзначением в качестве входных данных published.
+– findByTitleContaining(): возвращает все учебники, заголовок которых содержит ввод title.
+
+создаем папку controller(объясняем значение всех аннотаций в процессе написания кода):
+
+@CrossOrigin(origins = "http://localhost:8081")
+@RestController
+@RequestMapping("/api")
+public class TutorialController {
+
+  @Autowired
+  TutorialRepository tutorialRepository;
+
+  @GetMapping("/tutorials")
+  public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String title) {
+    try {
+      List<Tutorial> tutorials = new ArrayList<Tutorial>();
+
+      if (title == null)
+        tutorialRepository.findAll().forEach(tutorials::add);
+      else
+        tutorialRepository.findByTitleContaining(title).forEach(tutorials::add);
+
+      if (tutorials.isEmpty()) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      }
+
+      return new ResponseEntity<>(tutorials, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @GetMapping("/tutorials/{id}")
+  public ResponseEntity<Tutorial> getTutorialById(@PathVariable("id") long id) {
+    Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
+
+    if (tutorialData.isPresent()) {
+      return new ResponseEntity<>(tutorialData.get(), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @PostMapping("/tutorials")
+  public ResponseEntity<Tutorial> createTutorial(@RequestBody Tutorial tutorial) {
+    try {
+      Tutorial _tutorial = tutorialRepository
+          .save(new Tutorial(tutorial.getTitle(), tutorial.getDescription(), false));
+      return new ResponseEntity<>(_tutorial, HttpStatus.CREATED);
+    } catch (Exception e) {
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @PutMapping("/tutorials/{id}")
+  public ResponseEntity<Tutorial> updateTutorial(@PathVariable("id") long id, @RequestBody Tutorial tutorial) {
+    Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
+
+    if (tutorialData.isPresent()) {
+      Tutorial _tutorial = tutorialData.get();
+      _tutorial.setTitle(tutorial.getTitle());
+      _tutorial.setDescription(tutorial.getDescription());
+      _tutorial.setPublished(tutorial.isPublished());
+      return new ResponseEntity<>(tutorialRepository.save(_tutorial), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @DeleteMapping("/tutorials/{id}")
+  public ResponseEntity<HttpStatus> deleteTutorial(@PathVariable("id") long id) {
+    try {
+      tutorialRepository.deleteById(id);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @DeleteMapping("/tutorials")
+  public ResponseEntity<HttpStatus> deleteAllTutorials() {
+    try {
+      tutorialRepository.deleteAll();
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+  }
+
+  @GetMapping("/tutorials/published")
+  public ResponseEntity<List<Tutorial>> findByPublished() {
+    try {
+      List<Tutorial> tutorials = tutorialRepository.findByPublished(true);
+
+      if (tutorials.isEmpty()) {
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      }
+      return new ResponseEntity<>(tutorials, HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+}
+
+запускаем, проверяем либо в браузере либо с помощью Postman.
+

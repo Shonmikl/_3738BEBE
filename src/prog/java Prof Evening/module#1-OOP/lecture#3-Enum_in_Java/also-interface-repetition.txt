@@ -1,0 +1,63 @@
+public interface Shape {
+	double getArea();
+}
+
+public class Circle implements Shape {
+
+	private double radius;
+
+	public Circle(double r){
+		this.radius = r;
+	}
+	
+	@Override
+	public double getArea(){
+		return Math.PI*this.radius*this.radius;
+	}
+
+	public double getRadius(){
+		return this.radius;
+	}
+}
+
+public class Rectangle implements Shape {
+
+	private double width;
+	private double height;
+	
+	public Rectangle(double w, double h){
+		this.width=w;
+		this.height=h;
+	}
+
+	@Override
+	public double getArea() {
+		return this.height*this.width;
+	}
+
+}
+
+public class ShapeTest {
+
+	public static void main(String[] args) {
+		Shape shape = new Circle(10);
+		System.out.println("Area="+shape.getArea());
+		
+		shape=new Rectangle(10,10);
+		System.out.println("Area="+shape.getArea());
+		}
+
+}
+
+---
+??? как добиться для класса, чтобы создатель 100% не забыл сделать Геттеры и Сеттеры
+
+public class BankTransaction {
+    private long transactionId;
+    private Integer errorCode;
+    private int state;
+    private Long profileId;
+    private byte[] encryptionKey;
+}
+
+ответ implements Transaction с методами гет и сет

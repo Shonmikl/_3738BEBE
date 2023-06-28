@@ -1,0 +1,237 @@
+---
+Date
+
+Начнем с Date
+Класс Date предназначен для работы с текущими датой и временем и позволяет отталкиваться от них для решения своих задач. 
+Часть методов класса была перемещена в классы Calendar и DateFormat.
+
+public static void main(String[] args){
+
+        Date d1 = new Date();
+        System.out.println("Current date is " + d1);
+
+        Date d2 = new Date(2323223232L);
+        System.out.println("Date represented is "+ d2 );
+    }
+
+--
+поработаем с методами
+public static void main(String[] args){
+
+        Date d1 = new Date(2000, 11, 21);
+        Date d2 = new Date();  // Current date
+        Date d3 = new Date(2010, 1, 3);
+  
+        boolean a = d3.after(d1);
+        System.out.println("Date d3 comes after date d2: " + a);
+  
+        boolean b = d3.before(d2);
+        System.out.println("Date d3 comes before date d2: " + b);
+  
+        int c = d1.compareTo(d2);
+        System.out.println(c);
+  
+        System.out.println("Miliseconds from Jan 1 1970 to date d1 is " + d1.getTime());
+  
+        System.out.println("Before setting " + d2);
+        d2.setTime(204587433443L);
+        System.out.println("After setting " + d2);
+    }
+
+При работе с датами важно учитывать локаль (регион), попробуем вывести дату на немецком
+
+public static void main(String[] args) {
+        Locale locale = new Locale("de");
+        Locale.setDefault(locale);
+        Date now = new Date();
+        String date = String.format(locale, "%tc\n", now) + // длинная строка
+                String.format(locale, "%tD\n", now) + //(MM/DD/YY)
+                String.format(locale, "%tF\n", now) + //(YYYY-MM-DD)
+                String.format(locale, "%tr\n", now) + //Full 12-hour time
+                String.format(locale, "%tz\n", now) + //Time zone GMT offset
+                String.format(locale, "%tZ\n", now);//Localized time zone abbreviation
+        
+        System.out.println(date);
+    }
+
+Очень многие методы и классы являются устаревшими, например Locale с JDK 19 deprecated
+
+--
+Calendar and Grigorian
+
+Метод getInstance() класса Calendar возвращает объект класса GregorianCalendar
+
+Calendar calendar = Calendar.getInstance();
+System.out.println(calendar);
+
+У класса есть два поля AD и BC - до нашей эры и наша эра.
+Кроме стандартных методов, которые есть в классе Calendar, у GregorianCalendar есть метод isLeapYear() для проверки високосного года.
+ 
+boolean isLeapYear(int year); - не показываем, оставим для самостоятельной
+
+--
+	  // get()
+        GregorianCalendar javaDay = new GregorianCalendar(2022, Calendar.DECEMBER, 20);
+        int month = javaDay.get(Calendar.MONTH);
+        System.out.println(month);
+
+        // set()
+        javaDay = new GregorianCalendar(1975, Calendar.DECEMBER, 31);
+        javaDay.set(1976, Calendar.FEBRUARY, 23);
+        System.out.println(javaDay.get(Calendar.MONTH));
+
+        // add()
+        javaDay = new GregorianCalendar(1975, Calendar.DECEMBER, 31);
+        javaDay.add(Calendar.MONTH, 2);
+        System.out.println(javaDay.get(Calendar.MONTH));
+
+--
+простое форматирование
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        String dateString = formatter.format(new Date());
+        System.out.println(dateString);
+
+        calendar = Calendar.getInstance();
+        formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = formatter.format(calendar.getTime());
+        System.out.println(formattedDate);
+
+---
+самостоятельная
+1. реализовать метод, который принимает год и проверяет на високосность
+2. вывести на консоль дату локализованную для Индии (например)
+3. вывести дату в формате 19-12-22, 19, 353, 11:47 <дата, день месяца, день в году, время>
+
+-- solution
+Locale locale = new Locale("in");
+
+SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy, d, D, K:m");
+
+
+---
+LocalDate
+Note -> обратить внимание, что класс из ругого пакета
+
+public static void main(String[] args) {
+         
+        LocalDate date = LocalDate.now();
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        int dayOfMonth = date.getDayOfMonth();
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        System.out.println(date);
+        System.out.println(dayOfWeek);
+        System.out.printf("%d.%d.%d \n", dayOfMonth, month, year);
+
+	date = LocalDate.of(1996, 1, 1);
+         
+	date = date.plusYears(4);
+	date = date.plusMonths(3);
+	date = date.plusDays(14);
+	System.out.println(date);  
+         
+	date = date.minusMonths(10);
+	date = date.minusDays(3);
+	System.out.println(date); 
+    }
+
+---
+LocalDateTime - популярен и эффективен
+
+public static void main(String[] args) {
+        LocalDateTime now = LocalDateTime.now();
+        System.out.println(now);
+
+        // Adding 1 year, 1 month, 1 week and 1 day
+        LocalDateTime localDateTime = now.plusYears(1)
+                .plusMonths(1)
+                .plusWeeks(1)
+                .plusDays(1);
+
+        System.out.println(localDateTime);
+
+        // Subtracting 1 year, 1 month, 1 week and 1 day
+        localDateTime = localDateTime.minusYears(1)
+                .minusMonths(1)
+                .minusWeeks(1)
+                .minusDays(1);
+
+        System.out.println(localDateTime);
+
+        // Adding 1 hour, 1 minute, 1 second and 10000 nanoseconds
+        localDateTime = localDateTime.plusHours(1)
+                .plusMinutes(1)
+                .plusSeconds(1)
+                .plusNanos(10000);
+
+        System.out.println(localDateTime);
+
+        // Subtracting 1 hour, 1 minute, 1 second and 10000 nanoseconds
+        localDateTime = localDateTime.minusHours(1)
+                .minusMinutes(1)
+                .minusSeconds(1)
+                .minusNanos(10000);
+
+        System.out.println(localDateTime);
+    }
+
+---
+ Форматирование LocalDateTime в строку
+
+public static void main(String[] args) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss a");
+        LocalDateTime now = LocalDateTime.now();
+
+        // Formatting LocalDateTime to string
+        String dateTimeString = now.format(formatter);
+        
+        System.out.println(dateTimeString);
+    }
+
+---
+самостоятельная
+1. проанализировать работу методов: with(), plus(), isAfter(), isBefore()
+
+--
+решение
+
+	  LocalDateTime date1 = now.with(ChronoField.HOUR_OF_DAY, 10);
+        LocalDateTime date2 = now.withMonth(8);
+        LocalDateTime date3 = now.withYear(2013).withMinute(0);
+
+        // Сравнение
+        boolean after = now.isAfter(date1);
+        boolean before = now.isBefore(date1);
+        boolean equal = now.equals(date1);
+
+---
+ZoneDateTime
+
+public static void main(String[] args) {
+        String text = "2022-12-20T00:35:47.023323700+02:00[Europe/Helsinki]";
+        ZonedDateTime zone = ZonedDateTime.parse(text);
+        System.out.println(zone);
+
+
+        LocalDate date = LocalDate.now();
+
+        // getting current time
+        LocalTime time = LocalTime.now();
+
+        // getting system default zone id
+        ZoneId zoneId = ZoneId.systemDefault();
+
+        // creating a new ZonedDateTime object
+        ZonedDateTime zoneDateTime = ZonedDateTime.of(date, time, zoneId);
+        System.out.println(zoneDateTime);
+    }
+
+---
+финальное закрепление
+1) создать дату своего рождения, вывести на консоль в формате "10 Января 1985"
+2) проверить дата "10 Января 1985" - это пятница?
+3) вычесть 10 лет из созданной даты, вывести на консоль
+4) получить обьект Instant из "2022-12-19T06:55:30.00Z", вывести на консоль
+5) получить ZonedDateTime из "Pacific/Midway", вывести на консоль
+

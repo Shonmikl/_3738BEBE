@@ -1,0 +1,62 @@
+Пример чистой архитектуры:
+
+Давайте начнем определять системные правила для нашего API регистрации пользователей:
+
+Пароль пользователя должен содержать более пяти символов
+
+Создадим интерфейс:
+
+interface User {
+    boolean passwordIsValid();
+
+    String getName();
+
+    String getPassword();
+}
+
+и UserFactory:
+
+interface UserFactory {
+    User create(String name, String password);
+}
+
+класс CommonUser будет имплементировать User:
+
+class CommonUser implements User {
+
+    String name;
+    String password;
+
+    @Override
+    public boolean passwordIsValid() {
+        return password != null && password.length() > 5;
+    }
+
+    // Constructor and getters
+}
+
+
+class CommonUserFactory implements UserFactory {
+    @Override
+    public User create(String name, String password) {
+        return new CommonUser(name, password);
+    }
+}
+
+Если у нас сложный бизнес, то мы должны строить код нашего домена как можно более понятным . Таким образом, этот слой — отличное место для применения шаблонов проектирования . 
+В частности, следует принимать во внимание дизайн, ориентированный на предметную область.
+
+Создадим один единственный тест (необходимо объяснить аннотацию @Test):
+
+@Test
+void given123Password_whenPasswordIsNotValid_thenIsFalse() {
+    User user = new CommonUser("Baeldung", "123");
+
+    assertThat(user.passwordIsValid()).isFalse();
+}
+
+На первом уроке мы уже рассматривали способ проверки запросов с помощью Postman. В качестве большого примера можно представить
+проект из github:
+
+https://github.com/KevinDupeyrat/Hexagonal_Architecture_Article/tree/master/movies
+

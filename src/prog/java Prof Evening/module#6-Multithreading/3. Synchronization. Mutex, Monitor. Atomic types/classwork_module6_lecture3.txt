@@ -1,0 +1,244 @@
+Пример, в котором можно иногда показать проблему с конфликтом доступа к обновлению баланса.
+Можно продемонстрировать и пронаблюдать, что иногда будет встречаться баланс не 2000, а 1000. Ожидается, что встретим
+2000 всегда, но это не всегда так. Можно объяснить в чем проблема
+
+Для иллюстрации я складываю все балансы в set и вывожу её в консоль
+
+public class Example1 {
+    public static void main(String[] args) throws Exception {
+
+        Set<Integer> set = new HashSet<>();
+
+        for (int i = 0; i < 1000; i++) {
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBalance(0);
+
+            TestThread thread1 = new TestThread();
+            TestThread thread2 = new TestThread();
+
+            thread1.setBankAccount(bankAccount);
+            thread2.setBankAccount(bankAccount);
+
+            thread1.start();
+            thread2.start();
+
+            thread1.join();
+            thread2.join();
+
+            set.add(bankAccount.getBalance());
+        }
+
+        System.out.println(set);
+    }
+}
+
+class TestThread extends Thread {
+
+    BankAccount bankAccount;
+
+    public void setBankAccount(BankAccount bankAccount) {
+        this.bankAccount = bankAccount;
+    }
+
+    @Override
+    public void run() {
+        this.bankAccount.increaseBalance();
+    }
+}
+
+class BankAccount {
+    private int balance;
+
+    public void increaseBalance() {
+        balance = balance + 1000;
+    }
+
+//    для решения проблемы:
+//    public synchronized void increaseBalance() {
+//        balance = balance + 1000;
+//    }
+//    или
+//    public void increaseBalance() {
+//        synchronized (this) {
+//            balance = balance + 1000;
+//        }
+//    }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+}
+
+---
+
+Запуск такого кода подразумевает демонстрацию как работают потоки в консоли мы увидим более-менее неплохое
+разделение по потокам, вначале один, после второй, но нет гарантий по смешиванию, потоки могут смешиваться
+(можно увеличить счётчик в for-loop для демонстрации)
+
+помимо этого счётчик работает как бы сквозным образом, например вывод может быть таким (от 1 до 9 в данном случае, а
+задумка была от 1 до 5):
+// Thread-1: 1
+// Thread-1: 2
+// Thread-1: 3
+// Thread-1: 4
+// Thread-1: 5
+// Thread-0: 1
+// Thread-0: 6
+// Thread-0: 7
+// Thread-0: 8
+// Thread-0: 9
+
+но при добавлении зарезервированного слова synchronized и видим результат - разделение по потокам, у каждого потока
+свой счётчик, нет сквозного счётчика
+// Thread-0: 1
+// Thread-0: 2
+// Thread-0: 3
+// Thread-0: 4
+// Thread-0: 5
+// Thread-1: 1
+// Thread-1: 2
+// Thread-1: 3
+// Thread-1: 4
+// Thread-1: 5
+
+public class Example2 {
+
+    static int counter;
+
+    public static void main(String[] args)  throws Exception{
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {  // после меняем на public synchronized void run() {
+                // либо можно добавить в код synchronized(this) { в этом случае this - монитор синхронизации, поток захватывает монитор
+                counter = 0;
+                for (int i = 0; i < 5; i++) {
+                    counter += 1;
+                    System.out.println(Thread.currentThread().getName() + ": " + counter);
+                }
+            }
+        };
+
+        Thread thread1 = new Thread(runnable);
+        Thread thread2 = new Thread(runnable);
+
+        thread1.start();
+        thread2.start();
+
+        thread1.join();
+        thread2.join();
+    }
+}
+
+---
+
+пример с Atomic types и synchronized:
+
+public class Example4 {
+    public static void main(String[] args) throws InterruptedException {
+
+        вначале показывает классический подход, который не отработает желаемым образом
+        // classic
+        CounterClassic c = new CounterClassic();
+
+        Thread thread1Classic = new Thread(c, "First");
+        Thread thread2Classic = new Thread(c, "Second");
+
+        thread1Classic.start();
+        thread2Classic.start();
+
+        thread1Classic.join();
+        thread2Classic.join();
+
+        System.out.println("Classic = " + c.getCounter());
+
+
+        затем показываем как можно его решить с synchronized
+        // synchronized
+        CounterSync cs = new CounterSync();
+
+        Thread thread1Sync = new Thread(cs, "First");
+        Thread thread2Sync = new Thread(cs, "Second");
+
+        thread1Sync.start();
+        thread2Sync.start();
+
+        thread1Sync.join();
+        thread2Sync.join();
+
+        System.out.println("Synchronized = " + cs.getCounter());
+
+
+        напоследок показываем как работают atomic types, можно заменит на atmoiclong для демонстрации
+        // atomic
+        CounterAtomic ca = new CounterAtomic();
+
+        Thread thread1Atom = new Thread(ca, "First");
+        Thread thread2Atom = new Thread(ca, "Second");
+
+        thread1Atom.start();
+        thread2Atom.start();
+
+        thread1Atom.join();
+        thread2Atom.join();
+
+        System.out.println("Atomic = " + ca.getCounter());
+    }
+}
+
+
+class CounterClassic extends Thread {
+    private int counter = 0;
+
+    @Override
+    public void run() {
+
+        int max = 1_000_000;
+
+        for (int i = 0; i < max; i++)
+            ++counter;
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+}
+
+class CounterSync extends Thread {
+    private int counter = 0;
+
+    @Override
+    public synchronized void run() {
+
+        int max = 1_000_000;
+
+        for (int i = 0; i < max; i++)
+            ++counter;
+    }
+
+    public int getCounter() {
+        return counter;
+    }
+}
+
+
+class CounterAtomic extends Thread {
+    private AtomicInteger counter = new AtomicInteger();
+
+    @Override
+    public synchronized void run() {
+
+        int max = 1_000_000;
+
+        for (int i = 0; i < max; i++)
+            counter.addAndGet(1);
+    }
+
+    public int getCounter() {
+        return counter.get();
+    }
+}

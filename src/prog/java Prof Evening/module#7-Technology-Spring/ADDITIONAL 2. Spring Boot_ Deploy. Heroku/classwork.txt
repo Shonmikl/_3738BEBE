@@ -1,0 +1,81 @@
+Для использования Heroku нам необходим гитхаб аккаунт (если нет, то проходим этапы регистрации)
+
+Также регистрируемся в Heroku и скачиваем Heroku CLI.
+
+Создаем простой Rest service с помощью Spring.
+
+Создаем endpoint, который будет показывать актуальное время:
+
+@RestController
+@RequestMapping("/api/rest")
+public class TimeController {
+
+    @GetMapping("/time")
+    @ResponseStatus(HttpStatus.OK)
+    public String getCurrentTime() {
+
+        return Instant.now().toString();
+    }
+}
+
+проверяем endpoint.
+
+Теперь попробуем развернуть наше простое приложение.
+
+Ключевые команды. Коммит в гитхаб:
+
+git init
+git add .
+git commit -m "example of commit"
+
+далее логинимся в heroku:
+
+heroku login
+
+heroku create
+
+
+
+
+git init
+
+Создаем Procfile:
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar target/<your-jar-file-name>.jar
+
+чтобы создать jar файл:
+
+mvn clean package
+
+Далее добавим удаленный Heroku в свой репозиторий Git, используя следующую команду:
+
+heroku git:remote -a <your-app-name>
+
+
+видим успешное создание проекта, коммитим и пушим в гит:
+git add .
+git commit -m "Initial commit"
+git push heroku main
+
+переходим по URL и endpoint, видим что наш проект доступен.
+
+Задание:
+
+Heroku привязан к гит. В случае новых коммитов (при правильной настройке) хероку автоматически мониторит изменения.
+
+Создадим пример социальной сети. В нашем случае у нас есть Post и User. Продумайте логику.
+
+POST /users: Создание пользователя.
+
+GET /users/{id}: Возвращение информации о пользователе по id.
+
+GET /users: Возвращение информации о всех пользователях.
+
+DELETE /users: Удаление всех пользователей.
+
+DELETE /users/{id}: Удаление пользователя по id.
+
+GET /users/{id}/posts/post_id: Возвращение деталей об определенном посте.
+
+POST / users/{id}/ posts: Создание поста от определенного пользователя.
+
+После успешного выполнения работы, выполните деплой.

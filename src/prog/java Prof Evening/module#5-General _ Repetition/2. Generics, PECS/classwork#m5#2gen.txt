@@ -1,0 +1,235 @@
+А зачем, ведь все это Обьекты!
+---
+напишем пример
+
+public static void main(String []args){
+		List list = new ArrayList();
+		list.add("I like ");
+		String text = list.get(0) + "generics!";
+		System.out.print(text);
+	}
+
+работает! 
+Удалим из кода конкатенацию, не работает :(
+--
+Почему - обьяснить
+List хранит список объектов типа Object. 
+String — наследник для Object, то требует явного приведения, чего нет в коде. 
+А при конкатенации для объекта будет вызван статический метод String.valueOf(obj), который в итоге вызовет toString и тут все ок.
+
+--
+Вопрос, что мы можем сделать?
+
+--
+ответ:сделаем кастинг
+
+---
+добавим в код
+
+public static void main(String []args){
+		List list = new ArrayList();
+		list.add("Java?");
+		list.add(1);
+		for (Object str : list) {
+		    System.out.println((String)str);
+		}
+	}
+
+самое не приятное - компилятор не ругается, а ошибку получаем только в runtime
+Как исправить?
+Generics, начиная с java 5 мы можем сообщить всем и компилятору, что же будет у нас в листе храниться.
+
+Note -> можно заглянуть в байт код и посмотреть что в итоге <String> превратится в cast. 
+Причиной Generics - обеспечить обратную совместимость со старыми версиями JDK, 
+но при этом дать возможность помогать компилятору с определением типа в новых версиях Java.
+
+---
+Generic classs
+
+class Test<T> {
+    T obj;
+    Test(T obj) { 
+this.obj = obj; 
+} 
+    public T getObject() { 
+return this.obj; 
+}
+}
+  
+
+    public static void main(String[] args)
+    {
+        // instance of Integer type
+        Test<Integer> test1 = new Test<>(15);
+        System.out.println(test1.getObject());
+  
+        // instance of String type
+        Test<String> test2 = new Test<>("Generics");
+        System.out.println(test2.getObject());
+    }
+
+--
+
+class Test<T, U>{
+    T type1;  // An object of type T
+    U type2;  // An object of type U
+  
+    Test(T type1, U type2){
+        this.type1 = type1;
+        this.type2 = type2;
+    }
+  
+    public void print(){
+        System.out.println(type1);
+        System.out.println(type2);
+    }
+}
+  
+
+    public static void main (String[] args){
+        Test <String, Integer> test = new Test<String, Integer>("Java", 1);
+        test.print();
+    }
+
+---
+Generic Methods
+
+public static <T> void getElement(T element){
+        System.out.println(element.getClass().getName() + " = " + element);
+    }
+  
+    public static void main(String[] args){
+        // Integer argument
+        getElement(1);
+  
+        // String argument
+        getElement("Generics");
+  
+        // double argument
+        getElement(1.0);
+    }
+
+---
+Restrictions
+
+public static class OnlyNumber<T extends Number> {
+        private T number;
+
+        public OnlyNumber(T number){ 
+	this.number = number; 
+}
+
+        public void print() {
+            System.out.println(number);
+        }
+    }
+
+--
+    public static void main(String []args) {
+		OnlyNumber number1 = new OnlyNumber(1);
+		OnlyNumber number2 = new OnlyNumber(2L);
+		OnlyNumber number2 = new OnlyNumber('A');
+		OnlyNumber number3 = new OnlyNumber("A");
+    }
+
+
+---
+PECS
+
+public static class Test {
+	public static void print(List<? super String> list) {
+		list.add("I like Java!");
+		System.out.println(list.get(0));
+	}
+}
+
+public static void main(String []args) {
+	List<String> list = new ArrayList<>();
+	Test.print(list);
+}
+
+наполняем список list значением перед выводом, он для нас является потребителем, то есть consumer'ом.
+
+
+
+---
+Используйте Generics Wildcards, если необходимо извлечь объект типа T из коллекции.<? extends T>
+Используйте Generics Wildcards, если необходимо поместить объекты типа T в коллекцию.<? super T>
+---
+<? extends T>
+
+class Car {
+   @Override
+   public String toString() {
+      return "I am a Car!";
+   }
+}
+ 
+class BMW extends Car {
+   @Override
+   public String toString() {
+      return "I am a BMW!";
+   }
+}
+ 
+public class TestGenerics{
+   public static void main(String[] args){
+      //List of cars
+      List<BMW> cars = new ArrayList<>();
+      cars.add(new BMW());
+       
+      //We can assign a list of cars;
+      List<? extends Car> garage = cars;
+       
+      //Here we know that in garage there is nothing but cars only
+      for (Car car : garage){
+         System.out.println(car);
+      }
+       
+      // garage.add(new BMW()); //Compile time error
+      // garage.add(new Car()); //Compile time error
+   }
+}
+
+-> обьяснить причину
+
+обьявленный дженерик сообщает компилятору, что мы имеем дело с подтипом типа Car, но мы не можем знать, какой авто, так как может быть несколько подтипов. 
+У нас нет никакого способа сообщить, а мы должны гарантировать безопасность типа, компилятор запретит помещать что-либо внутри такой структуры. <? extends Car>
+
+---
+<? super T>
+
+class Car {
+   @Override
+   public String toString() {
+      return "I am a Car!";
+   }
+}
+ 
+class BMW extends Car {
+   @Override
+   public String toString() {
+      return "I am a BMW!";
+   }
+}
+ 
+class Volvo extends Car {
+   @Override
+   public String toString() {
+      return "I am a Volvo!";
+   }
+} 
+ 
+public class TestGenerics{
+   public static void main(String[] args){
+      List<BMW> cars = new ArrayList<>();
+      cars.add(new BMW());
+       
+      //We can assign a list of cars
+      List<? super Cars> garage = cars;
+       
+      garage.add(new BMW());      //Successful
+      garage.add(new Volvo()); //Successful
+      garage.add(new Car());    //Compile time error
+   }
+}

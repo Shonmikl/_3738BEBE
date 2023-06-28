@@ -1,0 +1,422 @@
+Эта структура данных представляет собой специализированный метод организации и хранения данных в компьютере для более эффективного использования. 
+Состоит из центрального узла, структурных узлов и подузлов, соединенных ребрами.
+Древовидная структура данных имеет корни, ветви и листья, связанные друг с другом. 
+
+Корневой узел: самый верхний узел дерева или узел, не имеющий родительского узла, называется корневым узлом. {1} — корневой узел дерева.
+Непустое дерево должно содержать ровно один корневой узел и ровно один путь от корня ко всем остальным узлам дерева.
+
+Родительский узел: узел, который является предшественником узла, называется родительским узлом этого узла. {2} является родительским узлом {4, 5, 6} .
+
+Дочерний узел: узел, который является непосредственным преемником узла, называется дочерним узлом этого узла. Примеры: {4,5,6} являются дочерними узлами {2}.
+
+Листовой узел или внешний узел: узлы, не имеющие дочерних узлов, называются листовыми узлами. {5,6,7,8,9,11} — листовые узлы дерева.
+
+Предок узла: любые предшествующие узлы на пути от корня к этому узлу называются предками этого узла. {1,2} — узлы-предки узла {7}
+
+Потомок: любой последующий узел на пути от конечного узла к этому узлу. {7,14} — потомки узла. {2} .
+
+Родной брат: дочерние элементы одного и того же родительского узла называются братьями и сестрами. {8,9,10} называются братьями и сестрами.
+
+Уровень узла: количество ребер на пути от корневого узла к этому узлу. Корневой узел имеет уровень 0.
+
+Внутренний узел: узел с хотя бы одним дочерним элементом называется внутренним узлом.
+
+Поддерево: любой узел дерева вместе с его потомком.
+
+СВОЙСТВА
+Количество ребер: ребро можно определить как соединение между двумя узлами.
+ 	Если дерево имеет N узлов, то оно будет иметь (N-1) ребер. 
+	Существует только один путь от каждого узла к любому другому узлу дерева.
+
+Глубина узла: Глубина узла определяется как длина пути от корня до этого узла. 
+	Каждое ребро добавляет к пути 1 единицу длины. Таким образом, его также можно определить как количество ребер на пути от корня дерева к узлу.
+
+Высота узла: высота узла может быть определена как длина самого длинного пути от узла до конечного узла дерева.
+
+Высота дерева: Высота дерева — это длина самого длинного пути от корня дерева до конечного узла дерева.
+
+Степень узла: общее количество поддеревьев, прикрепленных к этому узлу, называется степенью узла. 
+	Степень листового узла должна быть 0 .
+ 	Степень дерева — это максимальная степень узла среди всех узлов дерева.
+
+Еще некоторые свойства:
+Обход дерева осуществляется алгоритмами поиска в глубину и поиска в ширину.
+У него нет ни петли, ни цепи
+
+
+Зачем использовать деревья? 
+1. Одна из причин использования деревьев может заключаться в том, что вы хотите хранить информацию, которая естественным образом образует иерархию. Например, файловая система на компьютере: 
+
+К основным сферам применения деревьев относятся: 
+
+Работа с иерархическими данными. 
+Упростите поиск информации (см. обход дерева). 
+Управление отсортированными списками данных. 
+В качестве рабочего процесса для компоновки цифровых изображений для визуальных эффектов. 
+Алгоритмы маршрутизатора 
+Форма многоступенчатого принятия решений (см. деловые шахматы).
+
+ПРИМЕР ПРАКТИКА
+
+// Example1.java
+// Example1WebVersion.java - более удачный пример из интернета
+public class TreePractice {
+    public static void main(String[] args) {
+        BinaryTree bt = new BinaryTree();
+
+        bt.insert(1, "node 1");
+        bt.insert(2, "node 2");
+        bt.insert(3, "node 3");
+        bt.insert(4, "node 4");
+
+        bt.print();
+
+        bt.print(bt.find(1));
+    }
+}
+
+public class Node {
+    private int key;
+    private String value;
+    Node left;
+    Node right;
+
+    public void printNode() {
+        System.out.println(value);
+    }
+}
+
+public class BinaryTree {
+    private Node root;
+
+    public Node find(int key) {
+        Node current = root; // начинаем поиск с корневого узла
+
+        while (current.getKey() != key) { // поиск покуда не будет найден элемент или не будут перебраны все
+            if (current.getKey() < key) { // движение влево?
+                current = current.left;
+            } else {
+                current = current.right; //движение вправо
+            }
+            if (current == null) { // если потомка нет,
+                return null;
+            }
+        }
+        return current; // возвращаем найденный элемент
+    }
+
+    public void insert(int key, String value) {
+        Node newNode = new Node(); // создание нового узла
+        newNode.setKey(key);
+        newNode.setValue(value);
+        if (root == null) { // если корневой узел не существует
+            root = newNode;// то новый элемент и есть корневой узел
+        } else { // корневой узел занят
+            Node current = root;
+            Node parent = null;
+
+            while (true) // мы имеем внутренний выход из цикла
+            {
+                parent = current;
+                if (key == current.getKey()) {   // если такой элемент в дереве уже есть, не сохраняем его
+                    return;    // просто выходим из метода
+                } else if (key < current.getKey()) {   // движение влево?
+                    current = current.getLeft();
+                    if (current == null) { // если был достигнут конец цепочки,
+                        parent.setLeft(newNode); //  то вставить слева и выйти из методы
+                        return;
+                    }
+                } else { // Или направо?
+                    current = current.getRight();
+                    if (current == null) { // если был достигнут конец цепочки,
+                        parent.setRight(newNode);  //то вставить справа
+                        return; // и выйти
+                    }
+                }
+            }
+        }
+
+    }
+
+
+//        private Node insertNodeRecursive (Node current,int value){
+//            if (current == null) {
+//                Node node = new Node();
+//                node.setValue(value);
+//                return node;
+//            }
+//
+//            if (value < current.getValue()) {
+//                current.left = insertNodeRecursive(current.left, value);
+//            } else if (value > current.getValue()) {
+//                current.right = insertNodeRecursive(current.right, value);
+//            } else {
+//                return current;
+//            }
+//
+//            return current;
+//        }
+
+    public boolean delete(int value) {
+        return false;
+    }
+
+    public void print(Node node) {
+        if (node != null) {//условие сработает, когда мы достигним конца дерева и потомков не останется
+            print(node.left);//рекурсивно вызываем левых потомков
+            node.printNode();//вызов метода принт
+            print(node.right);//вызов правых
+        }
+    }
+
+    public void print() { // метод для вывода дерева в консоль
+        Stack globalStack = new Stack(); // общий стек для значений дерева
+        globalStack.push(root);
+        int gaps = 32; // начальное значение расстояния между элементами
+        boolean isRowEmpty = false;
+        String separator = "-----------------------------------------------------------------";
+        System.out.println(separator);// черта для указания начала нового дерева
+        while (isRowEmpty == false) {
+            Stack localStack = new Stack(); // локальный стек для задания потомков элемента
+            isRowEmpty = true;
+
+            for (int j = 0; j < gaps; j++)
+                System.out.print(' ');
+            while (globalStack.isEmpty() == false) { // покуда в общем стеке есть элементы
+                Node temp = (Node) globalStack.pop(); // берем следующий, при этом удаляя его из стека
+                if (temp != null) {
+                    System.out.print(temp.getValue()); // выводим его значение в консоли
+                    localStack.push(temp.getLeft()); // соохраняем в локальный стек, наследники текущего элемента
+                    localStack.push(temp.getRight());
+                    if (temp.getLeft() != null ||
+                            temp.getRight() != null)
+                        isRowEmpty = false;
+                } else {
+                    System.out.print("__");// - если элемент пустой
+                    localStack.push(null);
+                    localStack.push(null);
+                }
+                for (int j = 0; j < gaps * 2 - 2; j++)
+                    System.out.print(' ');
+            }
+            System.out.println();
+            gaps /= 2;// при переходе на следующий уровень расстояние между элементами каждый раз уменьшается
+            while (localStack.isEmpty() == false)
+                globalStack.push(localStack.pop()); // перемещаем все элементы из локального стека в глобальный
+        }
+        System.out.println(separator);// подводим черту
+    }
+}
+
+
+---
+
+BFS
+Обход дерева по уровням — это обход дерева в ширину или горизонтальный 
+
+BFS или Breadth First Search.
+
+public class Util {
+    public static void breadthFirstSearch(BinaryTree tree) {
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(tree.getRoot());
+
+        while (!queue.isEmpty()) {
+            Node tempNode = queue.poll();
+            System.out.print(tempNode.getValue() + " ");
+
+            /*Enqueue left child */
+            if (tempNode.getLeft() != null) {
+                queue.add(tempNode.getLeft());
+            }
+
+            /*Enqueue right child */
+            if (tempNode.getRight() != null) {
+                queue.add(tempNode.getRight());
+            }
+        }
+    }
+}
+
+
+DFS - depth first search
+Обходы в глубину: 
+(a) Inorder (Left, Root, Right) : 4 2 5 1 3 — обратный (инфиксный, in-ordered): левое поддерево – вершина – правое поддерево;
+
+(b) Preorder (Root, Left, Right) : 1 2 4 5 3  прямой (префиксный, pre-ordered): вершина – левое поддерево – правое поддерево;
+
+(c) Postorder (Left, Right, Root) : 4 5 2 3 1 — концевой (постфиксный, post-ordered): левое поддерево – правое поддерево – вершина.
+
+Обход по порядку ( практика ): 
+
+Алгоритм Inorder(tree) 
+   1. Пройти по левому поддереву, т.е. вызвать Inorder(left-subtree) 
+   2. Посетить корень. 
+   3. Пройти по правому поддереву, т.е. вызвать Inorder(right-subtree)
+
+
+Алгоритм предзаказа(дерево) 
+   1. Заходим в корень. 
+   2. Обходим левое поддерево, т. е. вызываем Preorder(left-subtree) 
+   3. Обходим правое поддерево, т. е. вызываем Preorder(right-subtree)
+
+Алгоритм Postorder(tree) 
+   1. Обход левого поддерева, т.е. вызов Postorder(left-subtree) 
+   2. Обход правого поддерева, т.е. вызов Postorder(right-subtree) 
+   3. Посещение корня.
+
+
+public class Util {
+    public static void breadthFirstSearch(Node node) {
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(node);
+
+        while (!queue.isEmpty()) {
+            Node tempNode = queue.poll();
+            System.out.print(tempNode.getValue() + " ");
+
+            /*Enqueue left child */
+            if (tempNode.getLeft() != null) {
+                queue.add(tempNode.getLeft());
+            }
+
+            /*Enqueue right child */
+            if (tempNode.getRight() != null) {
+                queue.add(tempNode.getRight());
+            }
+        }
+    }
+
+    public static void depthPostorder(Node node) {
+        if (node == null)
+            return;
+
+        // first recur on left subtree
+        depthPostorder(node.getLeft());
+
+        // then recur on right subtree
+        depthPostorder(node.getRight());
+
+        // now deal with the node
+        System.out.print(node.getValue() + " ");
+    }
+
+    /* Given a binary tree, print its nodes in inorder*/
+    public static void depthInorder(Node node) {
+        if (node == null)
+            return;
+
+        /* first recur on left child */
+        depthInorder(node.getLeft());
+
+        /* then print the data of node */
+        System.out.print(node.getValue() + " ");
+
+        /* now recur on right child */
+        depthInorder(node.getRight());
+    }
+
+    public static void depthInorderStack(Node node) {
+        if (node == null)
+            return;
+
+
+        Stack<Node> s = new Stack<>();
+        Node current = node;
+
+        // traverse the tree
+        while (current != null || !s.isEmpty()) {
+
+            /* Reach the left most Node of the
+            curr Node */
+            while (current != null) {
+                /* place pointer to a tree node on
+                   the stack before traversing
+                  the node's left subtree */
+                s.push(current);
+                current = current.getLeft();
+            }
+
+            /* Current must be NULL at this point */
+            current = s.pop();
+
+            System.out.print(current.getValue() + " ");
+
+            /* we have visited the node and its
+               left subtree.  Now, it's right
+               subtree's turn */
+            current = current.getRight();
+        }
+    }
+
+    /* Given a binary tree, print its nodes in preorder*/
+    public static void depthPreorder(Node node) {
+        if (node == null)
+            return;
+
+        /* first print data of node */
+        System.out.print(node.getValue() + " ");
+
+        /* then recur on left subtree */
+        depthPreorder(node.getLeft());
+
+        /* now recur on right subtree */
+        depthPreorder(node.getRight());
+    }
+
+
+---
+TreeMap
+важные особенности: 
+
+Этот класс является частью Collection.
+Класс реализует интерфейсы Map, включая NavigableMap, SortedMap.
+TreeMap в Java не допускает null ключей.
+
+Note -> для примера
+
+Конструктор 2: TreeMap (Comparator comp)
+
+Этот конструктор используется для создания пустого объекта TreeMap, в котором элементам потребуется внешняя спецификация порядка сортировки.
+
+---
+
+// Example2.java
+public class Student {
+    int age;
+    String name;
+
+    public Student(int age, String name) {
+        this.age = age;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "age=" + age +
+                ", name='" + name + '\'' +
+                '}';
+    }
+}
+  
+public class SortByAge implements Comparator<Student>  {
+    public int compare(Student a, Student b) {
+        return a.age - b.age;
+    }
+}
+  
+
+public class Test {
+  
+   public static void main(String[] args) {
+
+        TreeMap<Student, Integer> map = new TreeMap<>(new SortByAge());
+
+        map.put(new Student(33, "Aleks"), 33);
+        map.put(new Student(19, "Thea"), 19);
+        map.put(new Student(23, "Thomas"), 23);
+
+        System.out.println(map);
+    }
+}

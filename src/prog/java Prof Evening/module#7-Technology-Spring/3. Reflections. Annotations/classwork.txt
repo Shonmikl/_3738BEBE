@@ -1,0 +1,274 @@
+Пример работы Reflection API в Java
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Field;
+import java.lang.reflect.Constructor;
+
+// Создание объектов для класса Sample
+
+class Sample
+{
+// Создаем приватное поле private
+    String s;
+// Создаем публичный конструктор
+    public Sample() { s = "Java Reflection API"; }
+// Создаем публичный метод без параметров
+    public void method1() {
+        System.out.println("Информация в строке — " + s); }
+// Создаем публичный метод с целым числом в качестве параметра
+    public void method2(int x) {
+        System.out.println("Целое число — " + x);
+    }
+// Создаем приватный метод
+    private void method3() {
+        System.out.println("Вызов приватного метода");
+    }
+}
+
+class Exercise
+{
+    public static void main(String args[]) throws Exception
+    {
+// Создаем объект для последующей проверки свойств
+        Sample obj = new Sample();
+// Создаем новый объект класса из другого объекта
+        Class cls = obj.getClass();
+        System.out.println("Имя класса — " +
+                cls.getName());
+// Получаем имя конструктора класса с помощью объекта
+        Constructor constructor = cls.getConstructor();
+        System.out.println("Имя конструктора — " +
+                constructor.getName());
+        System.out.println("Это публичные методы классов: ");
+// Получаем методы классов с помощью объектов
+        Method[] methods = cls.getMethods();
+// Выводим имена методов
+        for (Method method:methods)
+            System.out.println(method.getName());
+// Создаем объект нужного метода с помощью имени метода и параметра класса
+        Method methodcall1 = cls.getDeclaredMethod("method2", int.class);
+// Вызов метода во время исполнения
+        methodcall1.invoke(obj, 25);
+// Создаем объект нужного поля с помощью имени поля
+        Field field = cls.getDeclaredField("s");
+// Открываем доступ к полю независимо от используемого в нем спецификатора доступа
+        field.setAccessible(true);
+// Устанавливаем новое значение поля
+        field.set(obj, "Tel-Ran");
+// Создаем объект метода с помощью имени метода
+        Method methodcall2 = cls.getDeclaredMethod("method1");
+// Вызов метода во время исполнения
+        methodcall2.invoke(obj);
+// Создаем третий объект метода с помощью имени метода
+        Method methodcall3 = cls.getDeclaredMethod("method3");
+// Изменяем настройки доступа
+        methodcall3.setAccessible(true);
+// Вызов метода во время исполнения
+
+        methodcall3.invoke(obj);
+    }
+}
+
+Аннотации
+
+Главная цель на сегодняшний урок рассказать об аннотациях для кода.
+
+Аннотация @Override
+
+Продемонстрируем применение аннотации. Создадим класс Parent с методом display(), класс Child, который является его наследником, и класс Main, который создает экземпляр Child и запускает метод display():
+
+public class Parent {
+    public void display() {
+        System.out.println("Выполнился метод из родительского класса");
+    }
+}
+
+public class Child extends Parent {
+    public void display() {
+        System.out.println("Выполнился метод из класса-наследника");
+    }
+}
+
+public class Main {
+    public static void main(String args[]) {
+        Child instance = new Child();
+    	  instance.display();
+    }
+}
+
+Умышленно добавим ошибку в названии метода в классе Child:
+
+public class Child extends Parent {
+    public void dispay() {
+        System.out.println("Выполнился метод из класса-наследника");
+    }
+}
+
+ошибку не получили, хотя и не переопредили метод display в родительском классе Parent. 
+
+Перед определением метода в класс Child добавим аннотацию @Override:
+
+public class Child extends Parent {    
+    @Override
+    public void dispay() {
+        System.out.println("Выполнился метод из класса-наследника");
+    }
+}
+
+Теперь уже компилятор сообщает нам, что «метод не переопределяет или не реализует метод его суперкласса».
+
+Применяя аннотацию @Override, мы даем задание компилятору выполнять проверку соответствия сигнатуры метода класса наследника классу родителя, что устраняет ошибки «по невнимательности» в виде опечаток.
+
+Аннотация @Deprecated
+
+В код предыдущего примера добавим в класс Child аннотацию @Deprecated:
+
+public class Child extends Parent {
+    @Override
+    @Deprecated(since = "1.2", forRemoval = true)
+    public void display() {
+        System.out.println("Выполнился метод из класса-наследника");
+    }
+}
+
+Результат остался тем же, ошибок нет. Но, обратите внимание на класс Main, используемый метод display() в IntellijIdea перечеркнут (!). Подобные визуальные оповещения есть и в других IDE.
+
+Аннотация @SuppressWarnings
+
+Предупреждающие сообщения компилятора обычно полезны, но иногда, они могут «зашумлять» полезную информацию. Особенно, когда мы не можем или не хотим их устранять. В таких случаях можно воспользоваться аннотацией @SuppressWarnings, отключив такие предупреждения, чтобы они не отображались.
+Рассматривая код для аннотации @Override, мы вызывали в классе Main метод display() из класса Child. В тоже время метод display() из класса Parent не использовался. Среда IDE предполагала, что здесь где-то может быть ошибка (создали лишний метод или ошибочно используем не тот метод и т. д.) и соответственно, подсвечивая, выделяла цветом название неиспользуемого метода display() (и при наведении курсора выдавала сообщение: «Method 'Display()' is never used»).
+Чтобы этого небыло, такое предупреждение можно отключить аннотацией @SuppressWarnings («unused»), установив её перед методом display():
+
+public class Parent {
+    @SuppressWarnings("unused")
+    public void display() {
+        System.out.println("Выполнился метод из родительского класса");
+    }
+}
+
+Еще одним предупреждением компилятора является предупреждение о применении устаревшего метода, помеченного в коде аннотацией @Deprecated. Чтобы его устранить, необходимо пометить вызов метода main() в классе Main аннотацией @SuppressWarnings («deprecation»):
+public class Main {
+    @SuppressWarnings("deprecation")
+    public static void main(String[] args) {
+        Child instance = new Child();
+    	  instance.display();
+    }
+}
+
+Сам код теперь стал проще для чтения, а название метода display() не перечеркивается.
+Чтобы отключить список из нескольких предупреждений, необходимо через запятую перечислить список предупреждений.
+Например, в следующем виде:
+
+@SuppressWarnings({"unused", "deprecation"})
+
+Аннотация @SafeVarargs
+
+Эта аннотация, представленная в java 7, гарантирует, что тело аннотированного метода или конструктора не выполняет потенциально небезопасные операции с параметром varargs.
+Аннотация @SafeVarargs похожа на @SupressWarnings тем, что позволяет нам объявить, что конкретное предупреждение компилятора является ложным срабатыванием. Добавлять эту аннотацию мы можем только убедившись в том, что наши действия безопасны.
+
+Аннотация @FunctionalInterface
+
+Как и аннотация @Override, аннотация @FunctionalInterface защищает код от возможных ошибок программиста. Несмотря на то, что любой интерфейс может содержать бесконечное множество абстрактных методов, функциональный интерфейс может содержать исключительно один абстрактный метод, иначе он не сможет использоваться в лямбда-выражении.
+
+Напишем функциональный интерфейс, реализующий что-то абстрактное и важное.
+
+@FunctionalInterface
+public interface MyFunctionalInterface {
+    abstract public void abstractMethod();
+    //abstract public void anotherAbstractMethod();
+}
+
+public class Main implements MyFunctionalInterface {
+
+    public static void main(String[] args) {
+        Main main = new Main();
+    	  main.abstractMethod();
+    }
+
+    @Override
+    public void abstractMethod() {
+        System.out.println("Это сообщение из abstractMethod()");
+    }
+}
+
+Если мы добавим еще один абстрактный метод (anotherAbstractMethod(), в коде он закомментирован), компилятор сообщит про ошибку.
+
+Ошибка сообщает, что наш интерфейс functionalInterface не является функциональным интерфейсом и включает в себя несколько не переопределенных абстрактных методов.
+Создадим еще один функциональный интерфейс и расширим им интерфейс, созданный нами ранее:
+
+@FunctionalInterface
+public interface AnotherFunctionalInterface extends MyFunctionalInterface {
+    abstract public void anotherAbstractMethod();
+}
+
+Вроде все хорошо, у нас один абстрактный метод, но IDE снова подсказывает о наличии той же самой ошибки.
+
+Ошибка вызвана тем, что мы, расширяя интерфейс MyFunctionalInterface, наследуем абстрактный метод расширяемого интерфейса, и как результат, имеем два абстрактных метода, что не совместимо с аннотацией @FunctionalInterface.
+Таким образом, мы не сможем использовать интерфейс, помеченный аннотацией @FunctionalInterface и включающей в себя явно или неявно два и более абстрактных метода.
+
+Сообственная аннотация HelloAnnotation.
+В этом примере HelloAnnotationимеет два члена value()и greetTo(). Аннотации содержат только объявление метода без тела реализации.
+Мы используем Reflection API, чтобы получить информацию о классе и методе, откуда мы можем прочитать информацию об аннотации, прикрепленной к классу или методу.
+
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface HelloAnnotation {
+    String value();
+
+    String greetTo();
+}
+
+GettingAnnotation.java:
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+
+@HelloAnnotation(value = "Hello", greetTo = "Universe")
+public class GettingAnnotation {
+    public static void main(String[] args) {
+        GettingAnnotation demo = new GettingAnnotation();
+
+        Class<? extends GettingAnnotation> clazz = demo.getClass();
+        Annotation[] annotations = clazz.getAnnotations();
+        for (Annotation annotation : annotations) {
+            System.out.println("Annotation Type: " + annotation.annotationType());
+        }
+
+        HelloAnnotation annotation = clazz.getAnnotation(HelloAnnotation.class);
+        System.out.println("Value  : " + annotation.value());
+        System.out.println("GreetTo: " + annotation.greetTo());
+
+        try {
+            Method m = clazz.getMethod("sayHi");
+
+            annotation = m.getAnnotation(HelloAnnotation.class);
+            System.out.println("Value  : " + annotation.value());
+            System.out.println("GreetTo: " + annotation.greetTo());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+
+        demo.sayHello();
+    }
+
+    @HelloAnnotation(value = "Hi", greetTo = "Alice")
+    public void sayHi() {
+    }
+
+    @HelloAnnotation(value = "Hello", greetTo = "Bob")
+    public void sayHello() {
+        try {
+            Method method = getClass().getMethod("sayHello");
+            HelloAnnotation annotation = method.getAnnotation(HelloAnnotation.class);
+
+            System.out.println(annotation.value() + " " + annotation.greetTo());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+

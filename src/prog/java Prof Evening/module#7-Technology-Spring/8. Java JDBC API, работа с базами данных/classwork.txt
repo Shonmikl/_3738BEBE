@@ -1,0 +1,393 @@
+Создадим новый проект с использованием maven и включим в pom.xml интересующие нас пакеты для подключения к MS SQL: jdbc, mssql-jdbc, mssql-jdbc_auth.
+
+import java.sql.*; // Импорт пакета для работы с базой
+
+public class MainClass {
+    public static void main(String[] args){
+		String server = "localhost"; // Адрес сервера БД
+		String dbName = "testDB"; // имя БД
+		String user = "user"; // Имя пользователя БД
+		String password = "password"; // пароль пользователя БД
+		
+        Connection conn = null; // Объявление переменной подключения
+		
+		// Формирование строки подключения и переменной с используемым драйвером
+        String connString = "jdbc:sqlserver://" + server + ";databaseName=" + dbName + ";"; 
+        String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
+		// Объявление переменной для выполнения запросов
+        Statement stmt;
+
+        try {
+			// Загрузка драйвера и инициализация подключения
+            Class.forName(driver);
+            conn = DriverManager.getConnection(connString, user, password);
+
+			// Формирование строки запроса
+            String query = "SELECT * FROM [testTable]";
+
+			// Инициализация обработчика запросов и указание ограничения на количество строк, 
+			// которые одновременно находятся в ОЗУ
+            stmt = conn.createStatement();
+			stmt.setFetchSize(100);
+
+			// Выполнение запроса
+            ResultSet responce = stmt.executeQuery(query);
+			
+			while(responce.next()) {
+				// Перебор всех строк в таблице и вывод первого столбца каждой строки
+				
+				System.out.println(responce.getString(1));
+			}
+
+            conn.close(); // Закрытие подключения
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+Создадим новый класс DBC, конструктор которого должен выполнять следующие задачи:
+
+ — получать необходимые для подключения данные;
+
+ — инициализировать соответствующие поля;
+
+ — проверять возможность подключения по переданным данным;
+
+ — при необходимости сообщать о неверно введённых данных и/или недоступности сервера. 
+
+А также конструктор необходимо перегрузить для возможности обрабатывать все возможные варианты подключения.
+
+import java.sql.*;
+
+public class DBC {
+    private final String serverUrl; // Адрес сервера баз данных
+    private final String dbName; // Имя базы данных
+    private String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver"; // Используемый драйвер
+    private String user = ""; // Имя пользователя базы данных
+    private String password = ""; // Пароль пользователя базы данных
+    private final boolean readyToWork; // Флаг готовности класса к работе с базы данных
+
+    /**
+     * Конструктор для работы со встроенной системой проверки безопасности.
+     *
+     * @param serverUrl Адрес сервера баз данных
+     * @param dbName    Имя базы данных
+     */
+    DBC(String serverUrl, String dbName) {
+        this.serverUrl = serverUrl;
+        this.dbName = dbName;
+
+        readyToWork = checkConnection();
+    }
+
+    /**
+     * Конструктор для работы со встроенной системой проверки безопасности и с указанным драйвером.
+     *
+     * @param serverUrl Адрес сервера баз данных
+     * @param dbName    Имя базы данных
+     * @param driver    Используемый драйвер. По умолчанию <code>com.microsoft.sqlserver.jdbc.SQLServerDriver</code>
+     */
+    DBC(String serverUrl, String dbName, String driver) {
+        this.serverUrl = serverUrl;
+        this.dbName = dbName;
+        this.driver = driver;
+
+        readyToWork = checkConnection();
+    }
+
+    /**
+     * Конструктор для работы с использованием имени и пароля пользователя базы данных.
+     *
+     * @param serverUrl Адрес сервера баз данных
+     * @param dbName    Имя базы данных
+     * @param user      Имя пользователя
+     * @param password  Пароль
+     */
+    DBC(String serverUrl, String dbName, String user, String password) {
+        this.serverUrl = serverUrl;
+        this.dbName = dbName;
+        this.user = user;
+        this.password = password;
+
+        readyToWork = checkConnection();
+    }
+
+    /**
+     * Конструктор для работы с использованием имени и пароля пользователя базы данных и указанием драйвера.
+     *
+     * @param serverUrl Адрес сервера баз данных
+     * @param dbName    Имя базы данных
+     * @param user      Имя пользователя
+     * @param password  Пароль
+     * @param driver    Используемый драйвер. По умолчанию <code>com.microsoft.sqlserver.jdbc.SQLServerDriver</code>
+     */
+    DBC(String serverUrl, String dbName, String user, String password, String driver) {
+        this.serverUrl = serverUrl;
+        this.dbName = dbName;
+        this.user = user;
+        this.password = password;
+        this.driver = driver;
+
+        readyToWork = checkConnection();
+    }
+}
+
+ Далее напишем приватный метод checkConnection, который будет создавать тестовое подключение и
+ при отсутствии ошибок возвращать true (иначе false), которое записывается в поле readyToWork,
+ выступающее флагом успешности/не успешности инициализации экземпляра класса. 
+Также напишем ещё один приватный метод createConnection, создающий и возвращающий новое подключение.
+ Он нужен для избегания ненужного дублирования кода.
+
+/**
+ * Создаёт объект подключения.
+ *
+ * @return Объект подключения.
+ */
+private Connection createConnection() {
+
+    // Формирование строки подключения
+    String connStr = "jdbc:sqlserver://" + this.serverUrl + ";databaseName=" + this.dbName + ";";
+
+    try {
+        // Установка драйвера
+        Class.forName(driver);
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        return null;
+    }
+
+    Connection conn;
+
+    if (this.user.equals("") && this.password.equals("")) {
+        // Подключение с встроенной проверкой безопасности
+
+        connStr += "integratedSecurity=true;";
+
+        try {
+            conn = DriverManager.getConnection(connStr);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    } else {
+        // Подключение по имени и паролю пользователя
+
+        try {
+            conn = DriverManager.getConnection(connStr, user, password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    return conn;
+
+}
+
+/**
+ * Проверяет возможность установления подключения с сервером баз данных.
+ *
+ * @return true - подключение успешно.
+ */
+private boolean checkConnection() {
+    Connection testConnection = createConnection();
+
+    if (testConnection == null) {
+        System.out.println("Can't connect to server. Check throws & url/dbName/username/password.\n" +
+                "*IntegratedSecurity option require sqljdbc_auth.dll in java.library.path.");
+        return false;
+    } else {
+        try {
+            testConnection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+}
+
+Теперь перейдём к выполнению запросов. Создадим публичный класс execQuery с единственным параметром – текстом запроса. Возвращать метод будет экземпляр ResultSet, содержащий результаты выполнения запроса.
+
+/**
+ * Выполняет любой запрос переданный в параметре
+ *
+ * @param query Текст запроса
+ * @return ResultSet с результатами работы запроса
+ */
+public ResultSet execQuery(String query) {
+    if (!readyToWork) {
+        System.out.println("DBC not ready to work! Abort:execQuerySelected");
+        return null;
+    }
+
+    Connection conn = createConnection();
+
+    Statement stmt;
+
+    try {
+        assert conn != null;
+        stmt = conn.createStatement();
+        stmt.setFetchSize(100);
+
+        return stmt.executeQuery(query);
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        System.out.println("Something wrong... Check your query text.");
+        return null;
+    }
+}
+
+Заменим первоначальный код работы с базой из начала статьи на следующий:
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class MainClass {
+
+    public static void main(String[] args) throws SQLException {
+        // Создание нового экземпляра
+        DBC dbc = new DBC("localhost", "testDB");
+
+        // Выполнение запроса
+        ResultSet response = dbc.execQuery ("select * from testTable");
+
+        // Вывод результата работы запроса на экран
+        if (response == null) {
+            System.out.println("NULL");
+        } else {
+            while (response.next()) {
+                System.out.println(response.getString(1));
+            }
+        }
+
+    }
+}
+
+Задание(выполняем вместе со студентами и в процессе объясняем команды SQL):
+Создайте класс UserTable и выполните запрос создания таблицы users:
+id INT(10) NOT NULL AUTO_INCREMENT,
+username VARCHAR(100),
+PRIMARY KEY(id)
+
+1.Создайте отдельный класс ConnectionDB и установите там все значения (названия базы данных, driver и так далее)
+
+2.Создайте отдельный класс и выполните вставку данных ( INSERT )
+3.Создайте отдельный класс и выполните выборку всех данных с Базы Данных (SELECT)
+
+Переносим все данные о БД в database.properties:
+
+db.driver = com.mysql.jdbc.Driver
+db.name = catalog
+db.url = jdbc:mysql://localhost:3306/
+db.user = root
+db.password = admin
+
+Использование ResourceBundle для чтения данных для аутентификации:
+
+public class ConnectorDB {
+    public static Connection getConnection() throws SQLException {
+        ResourceBundle resource = ResourceBundle.getBundle("database");
+        String url = resource.getString("db.url");
+        String user = resource.getString("db.user");
+        String pass = resource.getString("db.password");
+        String dbName = resource.getString("db.name");
+
+        return DriverManager.getConnection(url + dbName, user, pass);
+    }
+}
+
+Data access object (DAO):
+
+В программном обеспечении data access object (DAO) — это объект, который предоставляет абстрактный интерфейс к какому-либо типу базы данных или механизму хранения. DAO может использоваться для разных видов доступа к БД (JDBC, JPA).
+
+public abstract class AbstractDAO<K extends Number, T> {
+    public abstract List<T> findAll();
+
+    public abstract T findEntityById(K id);
+
+    public abstract boolean delete(K id);
+
+    public abstract boolean delete(T entity);
+
+    public abstract boolean create(T entity);
+
+    public abstract T update(T entity);
+}
+
+UserDao:
+
+public class UserDAO extends AbstractDAO<Integer, User> {
+    public static final String SQL_SELECT_ALL_USERS = "SELECT * FROM users";
+    public static final String SQL_SELECT_USER_ID =
+            "SELECT * FROM users WHERE id=?";
+
+    @Override
+    public List<User> findAll() {
+        List<User> users = new ArrayList<>();
+        try (Connection connection = ConnectorDB.getConnection();
+             Statement statement = connection.createStatement()) {
+            ResultSet rs = statement.executeQuery(SQL_SELECT_ALL_USERS);
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                String name = rs.getString(2);
+                users.add(new User(id, name));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return users;
+    }
+
+    @Override
+    public User findEntityById(Integer id) {
+        User user = null;
+        try (Connection connection = ConnectorDB.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_SELECT_USER_ID)) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                String name = rs.getString(2);
+                user = new User(id, name);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return user;
+    }
+
+    @Override
+    public boolean delete(Integer id) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean delete(User entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean create(User entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public User update(User entity) {
+        throw new UnsupportedOperationException();
+    }
+}
+
+MainDAO:
+
+public class MainDAO {
+    public static void main(String[] args) {
+        UserDAO userDAO = new UserDAO();
+        System.out.println(userDAO.findAll());
+        System.out.println(userDAO.findEntityById(1));
+    }
+}

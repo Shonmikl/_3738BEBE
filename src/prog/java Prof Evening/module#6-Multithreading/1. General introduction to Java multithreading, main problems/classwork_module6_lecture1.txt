@@ -1,0 +1,84 @@
+Использовать потоки можно используя:
+ - создавая новый класс от класса Thread и переопределяя run()
+ - через объёкт типа Runnable
+
+ через Thread:
+
+// Example1.java
+ Thread t = new Thread() {
+	@Override
+	public void run() {
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println(“Hello world!”);
+	}
+};
+
+t.start();
+
+
+
+через Runnable:
+
+// Example2.java
+Runnable r = () -> {
+	try {
+		Thread.sleep(5000);
+	} catch (InterruptedException e) {
+		throw new RuntimeException(e);
+	}
+	System.out.println(“Hello world!”);
+};
+
+Thread t = new Thread(r);
+
+t.start();
+
+---
+
+Демонстрация работы на живом примере о том, как различные потоки выводят информацию в консоль с разным временем ожидания главного и дочернего потока:
+
+// Example3.java
+public class Example3 {
+    public static void main(String[] args) {
+
+        new NewThread();
+
+        try {
+            for (int i = 5; i > 0; i--) {
+                System.out.println("Глaвный поток: " + i);
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException е) {
+            System.out.println("Глaвный поток прерван.");
+            System.out.println("Глaвный поток завершен.");
+        }
+    }
+}
+
+// класс для создания второго потока
+class NewThread implements Runnable {
+    Thread t;
+
+    NewThread() {
+        t = new Thread(this, "Демонстрационный поток");
+        System.out.println("Дoчepний поток создан: " + t);
+        t.start();
+    }
+
+    // точка входа во второй поток
+    public void run() {
+        try {
+            for (int i = 5; i > 0; i--) {
+                System.out.println("Дoчepний поток: " + i);
+                Thread.sleep(500);
+            }
+        } catch (InterruptedException е) {
+            System.out.println("Дoчepний поток прерван.");
+            System.out.println("Дoчepний поток завершен.");
+        }
+    }
+}

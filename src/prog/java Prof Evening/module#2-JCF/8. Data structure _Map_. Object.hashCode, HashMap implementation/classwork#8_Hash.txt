@@ -1,0 +1,495 @@
+Создание объектов Map
+Map является интерфейсом, нельзя создавать объекты типа map. 
+Всегда нужен класс, который расширяет эту Map, чтобы создать объект.
+После введения Generics в Java 1.5, можно ограничить тип объекта, который может храниться в Map.
+
+---
+HashMap
+хранит данные в парах (Ключ, Значение) 
+Один объект используется как ключ (индекс) для другого объекта (значения). 
+При попытке вставить дубликат ключа, заменится элемент соответствующего ключа.
+HashMap похож на HashTable, но не синхронизирован. 
+Позволяет хранить null ключ, но только один и может быть любое количество null значений. 
+Этот класс не дает никаких гарантий относительно порядка отображения.
+
+// Example1.java
+public static void main(String args[]) {
+        Map<String, Integer> map = new HashMap<>();
+  
+        map.put("a", 100);
+        map.put("b", 200);
+        map.put("c", 300);
+        map.put("d", 400);
+  
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.print(entry.getKey() + ":" + entry.getValue());
+        }
+    }
+
+---
+LinkedHashMap
+такой же, как и HashMap, с дополнительной функцией поддержания порядка вставленных в него элементов. 
+HashMap предоставлял преимущество быстрой вставки, поиска и удаления, но никогда не поддерживал порядок вставки, которые обеспечивает LinkedHashMap, где элементы могут быть доступны в их порядке вставки.
+
+// Example1.java
+public static void main(String args[]) {
+        Map<String, Integer> map = new LinkedHashMap<>();
+  
+        map.put("a", 100);
+        map.put("b", 200);
+        map.put("c", 300);
+        map.put("d", 400);
+  
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.print(entry.getKey() + ":" + entry.getValue());
+        }
+    }
+
+---
+TreeMap
+
+// Example1.java
+public static void main(String args[]) {
+        Map<String, Integer> map = new TreeMap<>();
+  
+        map.put("a", 100);
+        map.put("b", 200);
+        map.put("c", 300);
+        map.put("d", 400);
+  
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            System.out.print(entry.getKey() + ":" + entry.getValue());
+        }
+    }
+---
+Hashing
+
+Криптографические хеш-функции — незаменимый и повсеместно распространенный инструмент, используемый для выполнения целого ряда задач, включая аутентификацию, проверку целостности данных, защиту файлов и даже обнаружение зловредного ПО. 
+Существует масса алгоритмов хеширования, отличающихся криптостойкостью, сложностью, разрядностью и другими свойствами.
+
+
+У хэш-функции есть несколько обязательных свойств:
+
+Хэш всегда уникален для каждого массива информации. Однако иногда случаются так называемые коллизии, когда для разных входных блоков информации вычисляются одинаковые хэш-коды.
+При самом незначительном изменении входной информации ее хэш полностью меняется.
+Хэш-функция необратима и не позволяет восстанавливать исходный массив информации из символьной строки. Это можно сделать, только перебрав все возможные варианты, что при бесконечном количестве информации требует много времени и денег.
+Хэширование позволяет достаточно быстро вычислить нужный хэш для достаточно большого объема информации.
+Алгоритм работы хэш-функции, как правило, делается открытым, чтобы при необходимости можно было оценить ее стойкость к восстановлению начальных данных по выдаваемому хэшу.
+Хэш-функция должна уметь приводить любой объем данных к числу заданной длины.
+
+
+Применение хеш-функций
+Подробнее расказать о применении используя слайд презентации
+
+Работа с большими объемами информации
+
+Проверка целостности сообщений и файлов
+
+Верификация пароля
+
+Цифровая подпись
+
+---
+Note -> Надо нарисовать как это работает
+
+1. Раздельная цепочка
+
+Структуры данных для хранения цепочек: 
+Связанные списки (LinkedList)
+Поиск: O(l), где l = длина связанного списка
+Удалить: О(l)
+Вставка: О(l)
+Не поддерживает кеширование
+
+Массивы динамического размера (векторы в C++, ArrayList в Java, список в Python)
+Поиск: O(l), где l = длина массива
+Удалить: О(l)
+Вставка: О(l)
+Кэш дружественный
+
+Самобалансирующийся BST (деревья AVL, красные черные деревья)
+Поиск: О(лог(л))
+Удалить: О (журнал (л))
+Вставка: О(л)
+Не поддерживает кеширование
+Java 8 и более поздние версии используют это для HashMap
+
+Преимущества:
+Простота реализации. 
+Хэш-таблица никогда не заполняется, всегда можем добавить больше элементов в цепочку. 
+Менее чувствителен к хеш-функции или факторам нагрузки. 
+В основном используется, когда неизвестно, сколько и как часто ключи могут быть вставлены или удалены.
+ 
+Недостатки: 
+Производительность кеша цепочки не очень хорошая, поскольку ключи хранятся с использованием связанного списка. 
+Открытая адресация обеспечивает лучшую производительность кэша, поскольку все данные хранятся в одной таблице. 
+Если цепочка становится длинной, то время поиска в худшем случае может стать O(n).
+Использует дополнительное место для ссылок
+
+---
+
+2. открытая адресация
+Note -> Тут на усмотрение, если есть время можно рассказать о различных способах зондирования.
+Note -> Важно донести идею, и дать обьяснение, нарисовав на картинке и объяснив простую хеш-функцию key-mod-5 и вставку ключей
+
+Insert(k): продолжайте поиск, пока не будет найден пустой слот. Как только будет найден пустой слот, вставьте k. 
+Поиск(k): продолжайте поиск, пока ключ слота не станет равным k или пока не будет достигнут пустой слот. 
+Delete(k) : операция удаления интересна . Если мы просто удалим ключ, то поиск может не получиться. Поэтому слоты удаленных ключей специально помечаются как «удаленные». 
+
+1. Линейное зондирование
+2. Квадратичное зондирование
+3. Двойное хеширование
+
+---
+Пример
+
+линейное зондирование
+Шаг 1: Сначала нарисуйте пустую хеш-таблицу на 4 элемента
+Шаг 2: Теперь вставьте все ключи в хеш-таблицу один за другим
+	Первый ключ — 60. Он будет отображаться в слоте номер 0, потому что 60%5=0
+Шаг 3: Следующий ключ — 80. Он будет отображаться в слоте номер 0, потому что 80% 5 = 0, но 50 уже находится в слоте номер 0, поэтому найдите следующий пустой слот и вставьте его
+Шаг 4: Следующий ключ — 76. Он будет сопоставлен со слотом номер 1, потому что 76% 5 = 1, но 70 уже находится в слоте номер 1, поэтому найдите следующий пустой слот и вставьте его.
+Шаг 5: Следующий ключ — 103. Он будет отображаться в слоте номер 3, потому что 103% 5 = 3, поэтому вставьте его в слот номер 3.
+
+
+---
+Практика
+1. Найти маршрут из заданного списка билетов
+Предположим, что список билетов не является циклическим.
+
+Одним из решений является построение графа и его топологическая сортировка 
+Note -> попытка с графом будет через несколько лекций.
+
+Это решение использует Хэширование
+
+Идея состоит в том, чтобы сначала найти отправную точку. Отправная точка никогда не будет находиться в точке прибывания. 
+Как только мы найдем начальную точку, мы можем просто пройти по данной карте, чтобы распечатать маршрут по порядку.
+
+1) Создайте HashMap данной пары билетов. 
+	Каждая запись «набора данных» имеет форму «от -> до» 
+2) Найдите начальную точку маршрута.
+	а) Создайте обратную HashMap. Пусть реверс будет 'reverseMap'
+        Записи «reverseMap» имеют вид «до -> от».
+	б) Пройдите «набор данных». Для каждого ключа набора данных проверьте, есть в «reverseMap». Если ключа нет, то это отправная точка.
+3) Начните с найденной выше начальной точки и пройдите через «набор данных».
+
+---
+
+// Example2.java
+public class TaskOne {
+    public static void main(String[] args) {
+        Map<String, String> cityMap = new HashMap<>();
+        cityMap.put("Berlin", "London");
+        cityMap.put("Tokyo", "Seoul");
+        cityMap.put("Mumbai", "Berlin");
+        cityMap.put("Seoul", "Mumbai");
+        cityMap.put("London", "Helsinki");
+
+        getRoute(cityMap);
+    }
+
+    private static void getRoute(Map<String, String> cityMap) {
+        Map<String, String> reverseMap = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : cityMap.entrySet()) {
+            reverseMap.put(entry.getValue(), entry.getKey());
+        }
+
+        String start = null;
+
+        for (Map.Entry<String, String> entry : cityMap.entrySet()) {
+            if (!reverseMap.containsKey(entry.getKey())) {
+                start = entry.getKey();
+                break;
+            }
+        }
+
+        if (start == null) {
+            throw new NoSuchElementException("Invalid route, no start point");
+        }
+
+        String toCity = cityMap.get(start);
+
+        while (toCity != null) {
+            System.out.print(start + "->" + toCity + ", ");
+            start = toCity;
+            toCity = cityMap.get(toCity);
+        }
+    }
+}
+
+
+---
+2. Первый элемент, встречающийся k раз в массиве
+Дан массив из n целых чисел. Задача состоит в том, чтобы найти первый элемент, который встречается k раз. Если ни один элемент не встречается k раз, выведите -1. Распределение целочисленных элементов может быть в любом диапазоне.
+
+Ввод : {1, 7, 4, 3, 4, 8, 7}, k = 2 
+Вывод : 7 
+Объяснение: И 7, и 4 встречаются 2 раза. Но 7 — это первое, которое встречается 2 раза.
+
+Наивный подход: идея состоит в том, чтобы использовать два вложенных цикла.
+Один для выбора элемента, а другой для подсчета количества раз, когда выбранный элемент встречается в данном массиве.
+
+// Example3.java (method firstElement())
+    public static void main(String[] args) {
+        int[] arr = { 1, 7, 4, 3, 4, 8, 7 };
+        int n = arr.length;
+        int k = 2;
+        System.out.print(firstElement(arr, n, k));
+    }
+
+    public static int firstElement(int[] arr, int n, int k) {
+        for (int i = 0; i < n; i++) {
+            // Count how many time selected element occurs
+            int count = 0;
+            for (int j = 0; j < n; j++) {
+                if (arr[i] == arr[j]) {
+                    count++;
+                }
+            }
+ 
+            // Check, if it occurs k times or not
+            if (count == k) {
+                return arr[i];
+            }
+        }
+ 
+        return -1;
+    }
+
+Временная сложность : O(n^2).
+
+Эффективный подход: используйте unordered map для хеширования, поскольку диапазон неизвестен. Шаги:  
+
+Перемещайтесь по массиву элементов слева направо.
+При обходе увеличивайте их количество в хеш-таблице.
+Снова пройдитесь по массиву слева направо и проверьте, у какого элемента счетчик равен k. Распечатайте этот элемент и остановитесь.
+Если ни один элемент не имеет счетчика, равного k, выведите -1.
+
+// Example3.java (method firstElementMoreEffective())
+    static int firstElement(int arr[], int n, int k) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            int a = 0;
+
+            if(map.get(arr[i])!=null){
+                a = map.get(arr[i]);
+            }
+             
+            map.put(arr[i], a+1);
+        }
+ 
+        for (int i = 0; i < n; i++) // if count of element == k ,then it is the required first element
+        {
+            if (map.get(arr[i]) == k) {
+                return arr[i];
+            }
+        }
+ 
+        // no element occurs k times
+        return -1;
+    }
+
+Временная сложность: O(n)
+Вспомогательное пространство: O(n), потому что мы используем вспомогательный массив размера n для хранения счетчика
+
+---
+3. Проверьте, равны ли два массива или нет
+Учитывая два массива, arr1 и arr2 одинаковой длины N, задача состоит в том, чтобы определить, равны ли данные массивы или нет.
+
+Два массива называются равными, если:
+оба они содержат один и тот же набор элементов, 
+расположение (или перестановки) элементов может/не может быть одинаковым.
+Если есть повторения, то количество повторяющихся элементов также должно быть одинаковым, чтобы два массива были равны.
+
+Ввод: arr1[] = {1, 2, 5, 4, 0}, arr2[] = {2, 4, 5, 0, 1}
+Вывод: Да
+
+
+
+Выполните следующие шаги, чтобы решить проблему, используя этот подход:
+
+Отсортируйте оба массива
+Затем линейно сравните элементы обоих массивов
+Если все равны, верните true, иначе верните false
+
+// Example4.java (method areEqual())
+public static boolean areEqual(int arr1[], int arr2[]) {
+        int N = arr1.length;
+        int M = arr2.length;
+ 
+        // If lengths of array are not equal means
+        // array are not equal
+        if (N != M)
+            return false;
+ 
+        // Sort both arrays
+        Arrays.sort(arr1);
+        Arrays.sort(arr2);
+ 
+        // Linearly compare elements
+        for (int i = 0; i < N; i++)
+            if (arr1[i] != arr2[i])
+                return false;
+ 
+        // If all elements were same.
+        return true;
+    }
+
+Временная сложность: O(N*log(N)) 
+Вспомогательное пространство: O(1)
+
+
+ИСПОЛЬЗУЕМ ХЕШ
+Выполните шаги, указанные ниже, чтобы реализовать подход:
+
+Сначала проверьте, не равна ли длина arr1 длине arr2, затем верните false
+Затем перейдите по первому массиву и сохраните количество каждого элемента в хэш-карте.
+Затем перейдите ко второму массиву и уменьшите количество его элементов в хэш-карте. Если этот элемент отсутствует или количество этого элемента равно 
+нулю в хэш-карте, верните false, иначе уменьшите количество этого элемента.
+Верните true в конце, так как оба массива на данный момент равны.
+
+// Example4.java (method areEqualMoreEffectively())
+public static boolean areEqual(int arr1[], int arr2[]) {
+        int N = arr1.length;
+        int M = arr2.length;
+ 
+        // If lengths of arrays are not equal
+        if (N != M)
+            return false;
+ 
+        // Store arr1[] elements and their counts in
+        // hash map
+        Map<Integer, Integer> map
+            = new HashMap<Integer, Integer>();
+        int count = 0;
+        for (int i = 0; i < N; i++) {
+            if (map.get(arr1[i]) == null)
+                map.put(arr1[i], 1);
+            else {
+                count = map.get(arr1[i]);
+                count++;
+                map.put(arr1[i], count);
+            }
+        }
+ 
+        // Traverse arr2[] elements and check if all
+        // elements of arr2[] are present same number
+        // of times or not.
+        for (int i = 0; i < N; i++) {
+ 
+            // If there is an element in arr2[], but
+            // not in arr1[]
+            if (!map.containsKey(arr2[i]))
+                return false;
+ 
+            // If an element of arr2[] appears more
+            // times than it appears in arr1[]
+            if (map.get(arr2[i]) == 0)
+                return false;
+ 
+            count = map.get(arr2[i]);
+            --count;
+            map.put(arr2[i], count);
+        }
+ 
+        return true;
+    }
+
+Временная сложность: O(N) 
+Вспомогательное пространство: O(N)
+
+---
+4. Сгруппируйте слова с одинаковым набором символов
+
+Дан список слов со строчными буквами. Реализуйте функцию поиска всех слов с одинаковым уникальным набором символов. 
+
+Input: String words[] = {"student", "students", "dog", "god", "cat", "act", "flow", "wolf"};
+Output : 
+student, students, 
+cat, act, 
+dog, god, 
+flow, wolf, 
+
+Идея состоит в том, чтобы использовать хеширование. Генерируем ключ для всех слов. Ключ содержит все уникальные символы (размер ключа не более 26 для строчных букв). Мы храним индексы слов как значения для ключа. После того, как мы заполнили все ключи и значения в хеш-таблице, мы можем распечатать результат, пройдя по таблице.
+
+public class Test {
+    static final int MAX_CHAR = 26;
+
+    public static void main(String[] args) {
+        String[] words = {"student", "students", "dog", "god", "cat", "act", "flow", "wolf"};
+        wordsWithSameCharSet(words);
+    }
+
+    // Print all words together with same character sets.
+    static void wordsWithSameCharSet(String[] words) {
+        int length = words.length;
+
+        // Stores indexes of all words that have same set of unique characters. unordered_map <string, vector <int> > map;
+        Map<String, ArrayList<Integer>> map = new HashMap<>();
+
+        // алгоритм
+        // Перебрать все слова
+        // если ключ уже есть, получите соответствующее значение
+        //      обновить список и добавить в хэш
+        // если ключа нет
+        //      создайте новый список и добавьте ключ и список в хэш
+        
+        for (int i = 0; i < length; i++) {
+            String key = getKey(words[i]);
+
+            // if the key is already in the map then get its corresponding value and update the list and put it in the map
+            if (map.containsKey(key)) {
+                ArrayList<Integer> checkList = map.get(key);
+                checkList.add(i);
+                map.put(key, checkList);
+            } else { // if key is not present in the map then create a new list and add both key and the list
+                ArrayList<Integer> list = new ArrayList<>();
+                list.add(i);
+                map.put(key, list);
+            }
+        }
+
+        // print all words that have the same unique character set
+        for (Map.Entry<String, ArrayList<Integer>> it : map.entrySet()) {
+            ArrayList<Integer> get = it.getValue();
+            for (Integer v : get) {
+                System.out.print(words[v] + ", ");
+            }
+
+            System.out.println();
+        }
+    }
+
+    // Generates a key from given string. The key contains all unique characters of given string in sorted order consisting of only distinct elements.
+    static String getKey(String str) {
+        boolean[] visited = new boolean[MAX_CHAR];
+        Arrays.fill(visited, false);
+
+        // store all unique characters of current word in key
+        for (int i = 0; i < str.length(); i++) {
+            visited[str.charAt(i) - 'a'] = true;
+        }
+
+//        String key = "";
+//
+//        for (int j = 0; j < MAX_CHAR; j++) {
+//            if (visited[j]) {
+//                key = key + (char) ('a' + j);
+//            }
+//        }
+
+        StringBuilder key = new StringBuilder();
+
+        for (int i = 0; i < MAX_CHAR; i++) {
+            if (visited[i]) {
+                key.append((char) ('a' + i));
+            }
+        }
+
+        return key.toString();
+    }
+
+}
+
+

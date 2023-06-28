@@ -1,0 +1,157 @@
+---
+Проверка электронной почты и пароли — это несколько областей строк, в которых Regex широко используется. 
+
+---
+примеры Class Pattern
+
+public static void main(String[] args) {
+        String REGEX = ".*www.*";
+        String actualString = "www.telran.de";
+
+        // compile the regex to create pattern using compile() method
+        Pattern pattern = Pattern.compile(REGEX);
+
+        // check whether Regex string is found in actualString or not
+        boolean matches = pattern.matcher(actualString).matches();
+        System.out.println("actualString contains REGEX = " + matches);
+
+
+        // matches method
+        System.out.println(Pattern.matches(".*www.*", "www.telran.de"));
+
+    }
+
+
+---
+Class Matcher
+
+ public static void main(String[] args) {
+        // Custom pattern
+        Pattern pattern = Pattern.compile("tel");
+        Matcher m = pattern.matcher("telran.de");
+
+        // Finding string using find() method
+        while (m.find()) {
+            // Print starting and ending indexes
+            System.out.println("Pattern found from " + m.start() + " to " + (m.end() - 1));
+        }
+    }
+
+--
+Поиск шаблонов без учета регистра
+
+public static void main(String[] args) {
+        // Custom pattern
+        Pattern pattern = Pattern.compile("i", Pattern.CASE_INSENSITIVE);
+        Matcher m = pattern.matcher("I learned about Telran College and now I'm studying Java");
+
+        // Finding string using find() method
+        while (m.find()) {
+            // Print starting and ending indexes
+            System.out.println("Pattern found from " + m.start() + " to " + (m.end() - 1));
+        }
+    }
+
+--
+работа метода split() - потребуется возврат к слайду с синтаксис и обьяснения про delimiter
+
+public static void main(String[] args) {
+        String text = "I1learned2about3Telran4College5and6now7I'm8studying9Java";
+
+        String delimiter = "\\d";
+        Pattern pattern = Pattern.compile(delimiter, Pattern.CASE_INSENSITIVE);
+        String[] result = pattern.split(text);
+
+        for (String temp : result) {
+            System.out.print(temp + " ");
+        }
+    }
+
+---
+practice
+Проверка IP-адреса с помощью регулярных выражений
+IP-адрес представляет собой строку в виде «A.B.C.D», где значение A, B, C и D может варьироваться от 0 до 255. 
+Допускаются начальные нули. Длина A, B, C или D не может быть больше 3.
+
+// ReGex to numbers from 0 to 255
+zeroTo255 -> (\\d{1, 2}|(0|1)\\d{2}|2[0-4]\\d|25[0-5])
+
+// ReGex to validate complete IP address
+IPAddress -> zeroTo255 + "\\." + zeroTo255 
+                + "\\." + zeroTo255 
+                + "\\." + zeroTo255;
+
+\d представляет цифры в регулярных выражениях, как [0–9]
+\\d{1, 2} перехватывает любое однозначное или двузначное число
+(0|1)\\d{2} перехватывает любое трехзначное число, начинающееся с 0 или 1.
+2[0-4]\\d улавливает числа от 200 до 249.
+25[0-5] ловит числа от 250 до 255.
+
+public static void main(String[] args) {
+
+        String ip1 = "000.14.22.134";
+        System.out.println(isValidIPAddress(ip1));
+
+        String ip2 = "0.0.0.0";
+        System.out.println(isValidIPAddress(ip2));
+
+        String ip3 = "00.1.23.23.23";
+        System.out.println(isValidIPAddress(ip3));
+
+        String ip4 = "i.am.not.an.ip";
+        System.out.println(isValidIPAddress(ip4));
+    }
+
+    public static boolean isValidIPAddress(String ip) {
+        if (ip == null) {
+            return false;
+        }
+
+        // Regex for digit from 0 to 255.
+        String zeroTo255
+                = "(\\d{1,2}|(0|1)\\d{2}|2[0-4]\\d|25[0-5])";
+
+        // Regex for a digit from 0 to 255
+        String regex = zeroTo255 + "\\."
+                     + zeroTo255 + "\\."
+                     + zeroTo255 + "\\."
+                     + zeroTo255;
+
+        // Compile the ReGex
+        Pattern pattern = Pattern.compile(regex);
+        Matcher m = pattern.matcher(ip);
+
+        // Return if the IP address matched the ReGex
+        return m.matches();
+    }
+
+---
+самостоятельная
+1) Напишите регулярное выражение, которое соответствует любому номеру телефона.
+Телефонный номер состоит из 7 цифр подряд, или из 3х цифр, пробела или тире, а затем из 4 цифры.
+
+ public static void main(String[] args) {
+
+        String regex = "\\d\\d\\d([,\\s])?\\d\\d\\d\\d";
+
+        String number1 = "1233323322";
+        String number2 = "1233323";
+        String number3 = "123 3323";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(number1);
+        System.out.println(matcher.matches());
+
+        matcher = pattern.matcher(number2);
+        System.out.println(matcher.matches());
+
+        matcher = pattern.matcher(number3);
+        System.out.println(matcher.matches());
+    }
+
+Note -> это целое искусство, без практики сложно писать регулярные выражения. :) 
+
+В качестве дз, можно дать проверку мейла или пароля.
+
+
+

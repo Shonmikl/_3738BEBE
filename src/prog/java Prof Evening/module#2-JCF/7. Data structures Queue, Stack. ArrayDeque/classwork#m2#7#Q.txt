@@ -1,0 +1,446 @@
+---
+Stack - LIFO
+
+---
+Serializable
+
+Note -> самое время дать небольшое обьяснение сериализации, но без фанатизма, т.к. это будет в модуле 4
+
+Сериализация — это преобразование состояния объекта в поток байтов; десериализация делает обратное.
+Процесс сериализации не зависит от экземпляра; например, мы можем сериализовать объекты на одной платформе и десериализовать их на другой. 
+Классы, подходящие для сериализации, должны реализовать специальный интерфейс маркера Serializable. 
+
+в основном используется для перемещения состояния объекта в сети (это называется ранжированием).
+Класс String и все классы-оболочки по умолчанию реализуют интерфейс java.io.Serializable
+
+---
+Как создать стек?
+Чтобы создать стек, мы должны импортировать пакет java.util.stack и использовать конструктор Stack() этого класса.
+
+Stack<E> stack = new Stack<E>();
+
+---
+практика
+1. Добавление элементов. Чтобы добавить элемент в стек, мы можем использовать метод push(). 
+Эта операция push() помещает элемент на вершину стека.
+
+---
+Note -> задайте вопрос о порядке вывода, перед запуском
+
+// Example1.java
+public static void main(String[] args) {
+        Stack<String> stack = new Stack<>();
+  
+        stack.push("I");
+        stack.push("am");
+        stack.push("Aleks");
+
+        System.out.println(stack);
+    }
+
+
+2. Доступ к элементу. Чтобы получить или извлечь первый элемент стека или элемент, находящийся на вершине стека, мы можем использовать метод peek(). Полученный элемент не удаляется и не удаляется из стека. 
+
+// Example1.java
+    public static void main(String[] args) {
+        Stack<String> stack = new Stack<>();
+
+        stack.push("I");
+        stack.push("am");
+        stack.push("Aleks");
+
+        System.out.println(stack);
+
+        System.out.println("The element at the top of the stack is: " + stack.peek());
+
+        System.out.println(stack);
+    }
+
+3. Удаление элементов. Чтобы извлечь элемент из стека, мы можем использовать метод pop(). 
+Элемент извлекается из вершины стека и удаляется из него.
+
+// Example1.java
+public static void main(String[] args) {
+        Stack<String> stack = new Stack<>();
+
+        stack.push("I");
+        stack.push("am");
+        stack.push("Aleks");
+
+        System.out.println(stack);
+
+        System.out.println(stack.pop());
+
+        System.out.println(stack);
+    }
+
+---
+Note -> Можно показате еще несколько основных методов 
+
+empty() возвращает true, если на вершине стека ничего нет. В противном случае возвращает ложь.
+
+---
+Note -> Обратить внимание, что вершина в Стек это не нулевой индекс !!!
+
+search(Object e) определяет, существует ли объект в стеке. 
+Если элемент найден, возвращает позицию элемента с вершины стека. В противном случае он возвращает -1
+
+        System.out.println(stack.search("I"));
+        System.out.println(stack.search("am"));
+        System.out.println(stack.search("Aleks"));
+
+
+---
+Queue 
+
+Note -> небольшое повторение
+
+LinkedList - уже разобрали
+PriorityQueue - будут изучать на алгоритмах, не задерживаемся тут
+
+Небольшой пример о PriorityBlockingQueue
+
+PriorityBlockingQueue — это неограниченная, блокирующаяся очередь
+добавление элементов иногда может завершаться ошибкой из-за исчерпания ресурсов, что приводит к OutOfMemoryError.
+
+// Example2.java
+public static void main(String[] args) {
+        Queue<Integer> queue = new PriorityBlockingQueue<Integer>();
+        
+        queue.add(1);
+        queue.add(2);
+        queue.add(5);
+
+        // the top element of the PriorityBlockingQueue
+        System.out.println(queue.peek());
+
+        // return the top element and removing it from the PriorityBlockingQueue
+        System.out.println(queue.poll());
+    }
+
+Note -> можно перейти в методы и показать JD описание
+
+
+---
+Note -> интро в интерфейс Deque
+
+Интерфейс Deque, представленный в пакете java.util, является подтипом интерфейса Queue. 
+Deque относится к двусторонней очереди, которая поддерживает добавление или удаление элементов с любого конца структуры данных. 
+Его можно использовать либо как очередь (первым пришел, первым ушел/FIFO) , либо как стек (последним пришел – первым ушел/LIFO).
+
+---
+Практика
+custom ArrayDeque
+
+начинаем с пустого массива и переменных
+
+headIndex — указывает на голову
+tailIndex — указывает на хвост, т. е. на поле, которое будет заполнено следующим в конце очереди.
+numberOfElements — количество элементов
+
+Сначала headIndex, tailIndex, указывающие на середину массива, чтобы у нас было достаточно места для добавления элементов как в начало, так и в конец очереди
+
+Note -> идею можно нарисовать с объяснением
+
+---
+первым делом реализуем статический вариант или коллективная работа через Гит
+распределяем методы для реализации между студентами, каждый делает свой бренч и реализует методы
+
+// Example3.java
+---
+public interface MyDeque<Integer> {
+    void addToHead(Integer element);
+    void addToTail(Integer element);
+
+    Integer removeHead();
+    Integer removeTail();
+
+    Integer peekHead();
+    Integer peekTail();
+
+    boolean isEmpty();
+
+    Integer getByIndex(int index);
+    boolean contains(Integer element);
+    
+    /*
+    
+    void grow();
+    int calculateNewCapacity(int currentCapacity);
+    int calculateAdditionalCapacity(int currentCapacity);
+
+    additional JUnit tests for this methods
+    
+     */
+    
+}
+
+---
+public class MyArrayDeque implements MyDeque<Integer> {
+
+    private final Integer[] elements;
+    private int headIndex;
+    private int tailIndex;
+    private int numberOfElements;
+
+    public MyArrayDeque(int capacity) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be 1 or higher");
+        }
+        elements = new Integer[capacity];
+    }
+
+    @Override
+    public void addToHead(Integer element) {
+        if (numberOfElements == elements.length) {
+            throw new IllegalStateException("The deque is full");
+        }
+        headIndex = decreaseIndex(headIndex);
+        elements[headIndex] = element;
+        numberOfElements++;
+    }
+
+    @Override
+    public void addToTail(Integer element) {
+        if (numberOfElements == elements.length) {
+            throw new IllegalStateException("The deque is full");
+        }
+        elements[tailIndex] = element;
+        tailIndex = increaseIndex(tailIndex);
+        numberOfElements++;
+    }
+
+    @Override
+    public Integer removeHead() {
+        Integer element = elementAtHead();
+        elements[headIndex] = null;
+        headIndex = increaseIndex(headIndex);
+        numberOfElements--;
+        return element;
+    }
+
+    @Override
+    public Integer removeTail() {
+        Integer element = elementAtTail();
+        tailIndex = decreaseIndex(tailIndex);
+        elements[tailIndex] = null;
+        numberOfElements--;
+        return element;
+    }
+
+    @Override
+    public Integer peekHead() {
+        return elementAtHead();
+    }
+
+    @Override
+    public Integer peekTail() {
+        return elementAtTail();
+    }
+
+    private Integer elementAtHead() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return elements[headIndex];
+    }
+
+    private Integer elementAtTail() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return elements[decreaseIndex(tailIndex)];
+    }
+
+    private int decreaseIndex(int index) {
+        index--;
+        if (index < 0) {
+            index = elements.length - 1;
+        }
+        return index;
+    }
+
+    private int increaseIndex(int index) {
+        index++;
+        if (index == elements.length) {
+            index = 0;
+        }
+        return index;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return numberOfElements == 0;
+    }
+}
+
+---
+Добавим динамический рост
+
+---
+Ёмкость
+
+---
+Note -> можно задать вопрос про максимально возможный размкр массива
+
+public static final int MAX_SIZE = Integer.MAX_VALUE - 5; 
+private static final int DEFAULT_INITIAL_CAPACITY = 10;
+---
+конструктор
+public ArrayDeque() {
+    this(DEFAULT_INITIAL_CAPACITY);
+  }
+
+---
+обновленный класс
+
+public class MyArrayDeque implements MyDeque<Integer> {
+
+    public static final int MAX_SIZE = Integer.MAX_VALUE - 5;
+
+    private static final int DEFAULT_INITIAL_CAPACITY = 10;
+    private Integer[] elements;
+    private int headIndex;
+    private int tailIndex;
+    private int numberOfElements;
+
+    public MyArrayDeque() {
+        this(DEFAULT_INITIAL_CAPACITY);
+    }
+
+    public MyArrayDeque(int capacity) {
+        if (capacity < 1) {
+            throw new IllegalArgumentException("Capacity must be 1 or higher");
+        }
+        elements = new Integer[capacity];
+    }
+
+    @Override
+    public void addToHead(Integer element) {
+        if (numberOfElements == elements.length) {
+            grow();
+        }
+        headIndex = decreaseIndex(headIndex);
+        elements[headIndex] = element;
+        numberOfElements++;
+    }
+
+    @Override
+    public void addToTail(Integer element) {
+        if (numberOfElements == elements.length) {
+            grow();
+        }
+        elements[tailIndex] = element;
+        tailIndex = increaseIndex(tailIndex);
+        numberOfElements++;
+    }
+
+    private void grow() {
+        int newCapacity = calculateNewCapacity(elements.length);
+        growToNewCapacity(newCapacity);
+    }
+
+    private int calculateNewCapacity(int currentCapacity) {
+        if (currentCapacity == MAX_SIZE) {
+            throw new IllegalStateException("Can't grow further");
+        }
+
+        int newCapacity = currentCapacity + calculateAdditionalCapacity(currentCapacity);
+
+        if (newCapacity > MAX_SIZE || newCapacity < 0) {
+            newCapacity = MAX_SIZE;
+        }
+
+        return newCapacity;
+    }
+
+     private int calculateAdditionalCapacity(int currentCapacity) {
+        return currentCapacity < 255 ? currentCapacity : (int) (currentCapacity / 1.75);
+    }
+
+    private void growToNewCapacity(int newCapacity) {
+        Integer[] newArray = new Integer[newCapacity];
+
+        int startIndex = elements.length / 2 + 1;
+        System.arraycopy(elements, startIndex, newArray, newArray.length / 2 + 1, newArray.length / 2 + tailIndex);
+
+        startIndex = newArray.length / 2 - headIndex - 1;
+        if (tailIndex > 0) {
+            System.arraycopy(elements, headIndex, newArray, startIndex, newArray.length / 2);
+        }
+
+        headIndex = startIndex;
+        tailIndex = newArray.length / 2 + tailIndex;
+        elements = newArray;
+    }
+
+    @Override
+    public Integer removeHead() {
+        Integer element = elementAtHead();
+        elements[headIndex] = null;
+        headIndex = increaseIndex(headIndex);
+        numberOfElements--;
+        return element;
+    }
+
+    @Override
+    public Integer removeTail() {
+        Integer element = elementAtTail();
+        tailIndex = decreaseIndex(tailIndex);
+        elements[tailIndex] = null;
+        numberOfElements--;
+        return element;
+    }
+
+    @Override
+    public Integer peekHead() {
+        return elementAtHead();
+    }
+
+    @Override
+    public Integer peekTail() {
+        return elementAtTail();
+    }
+
+    private Integer elementAtHead() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return elements[headIndex];
+    }
+
+    private Integer elementAtTail() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return elements[decreaseIndex(tailIndex)];
+    }
+
+    private int decreaseIndex(int index) {
+        index--;
+        if (index < 0) {
+            index = elements.length - 1;
+        }
+        return index;
+    }
+
+    private int increaseIndex(int index) {
+        index++;
+        if (index == elements.length) {
+            index = 0;
+        }
+        return index;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return numberOfElements == 0;
+    }
+}
+
+---
+Разница между Deque и Stack
+
+Подвести итог.
+
+
